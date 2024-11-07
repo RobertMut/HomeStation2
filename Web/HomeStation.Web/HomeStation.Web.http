@@ -1,0 +1,6 @@
+@Web.Server_HostAddress = http://localhost:5216
+
+GET {{Web.Server_HostAddress}}/AirController/
+Accept: application/json
+
+###

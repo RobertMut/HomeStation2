@@ -1,0 +1,15 @@
+﻿/.idea/
+/Web/.idea/
+/Web/.vs/
+/Web/web.client/.vscode/
+/Web/HomeStation.Domain/bin/
+/Web/HomeStation.Domain/obj/
+/Web/HomeStation.Application/bin/
+/Web/HomeStation.Application/obj/
+/Web/HomeStation.Infrastructure/bin/
+/Web/HomeStation.Infrastructure/obj/
+/Web/HomeStation.Web/obj/
+/Web/HomeStation.Web/bin/
+/device/.pio/
+/device/.vscode/
+/device/build/

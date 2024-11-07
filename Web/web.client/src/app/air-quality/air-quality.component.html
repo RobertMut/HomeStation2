@@ -1,0 +1,4 @@
+<ng-container>
+  <canvas id="chart" appChartComponentBase></canvas>
+</ng-container>
+<app-data-picker (onSubmit)="getReadings($event, ReadingType.Quality, GraphType.AirQuality)"/>

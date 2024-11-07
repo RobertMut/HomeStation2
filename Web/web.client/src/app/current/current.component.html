@@ -1,0 +1,40 @@
+<mat-form-field>
+  <mat-label>Device</mat-label>
+  <mat-select (valueChange)="getReading($event)">
+    <mat-option *ngFor="let device of devices | async" [value]="device" >{{ device.name }}</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<ng-container *ngIf="loaded">
+  <ng-container *ngIf="reading | async as r">
+    <p>Reading date: {{r?.readDate}}</p>
+    <div class="cards">
+      <mat-card>
+        <mat-card-header><mat-icon>device_thermostat</mat-icon></mat-card-header>
+        <mat-card-content>{{r?.temperature}}</mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-header><mat-icon>water_drop</mat-icon></mat-card-header>
+        <mat-card-content>{{r?.humidity}}</mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-header><mat-icon>airware</mat-icon> PM 2.5</mat-card-header>
+        <mat-card-content>{{r?.pm2_5}}</mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-header><mat-icon>airware</mat-icon> PM 10</mat-card-header>
+        <mat-card-content>{{r?.pm10}}</mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-header><mat-icon>public</mat-icon> Pressure</mat-card-header>
+        <mat-card-content>{{r?.pressure != undefined ? r.pressure / 100 : r?.pressure}}</mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-header><mat-icon>airware</mat-icon> PM 1.0</mat-card-header>
+        <mat-card-content>{{r?.pm1_0}}</mat-card-content>
+      </mat-card>
+    </div>
+  </ng-container>
+
+</ng-container>
+

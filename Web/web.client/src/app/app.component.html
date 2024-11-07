@@ -1,0 +1,25 @@
+﻿<mat-drawer-container>
+  <mat-drawer #drawer mode="side">
+    <mat-icon (click)="drawer.close()">close</mat-icon>
+    <div>
+      <app-manage/>
+    </div>
+  </mat-drawer>
+  <nav mat-tab-nav-bar>
+    <mat-icon
+      *ngIf="!drawer.opened"
+      (click)="drawer.toggle()">
+      menu
+    </mat-icon>
+    <a mat-tab-link
+       *ngFor="let link of links"
+       [routerLink]="link.link"
+       routerLinkActive #rla="routerLinkActive"
+       [active]="rla.isActive">
+      {{link.label}}
+    </a>
+  </nav>
+  <router-outlet ></router-outlet>
+</mat-drawer-container>
+
+

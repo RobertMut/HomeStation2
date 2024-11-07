@@ -1,0 +1,17 @@
+<form>
+  <mat-list>
+    @for (device of devices; track device){
+      <mat-list-item class="with-icon">
+        <span>{{ device.name }}</span>
+        <button mat-icon-button (click)="putApproval(device)">
+          @if(device.isKnown){
+            <mat-icon>add_circle</mat-icon>
+          }
+          @if(!device.isKnown){
+            <mat-icon>cancel</mat-icon>
+          }
+        </button>
+      </mat-list-item>
+    }
+  </mat-list>
+</form>
