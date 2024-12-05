@@ -1,4 +1,4 @@
-﻿namespace HomeStation.Application.CQRS.GetLatestReadingQuery;
+﻿namespace HomeStation.Application.CQRS.ReadingsQuery;
 
 public class GetLatestReadingQuery
 {

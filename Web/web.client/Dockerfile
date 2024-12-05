@@ -15,4 +15,4 @@ RUN ng build --configuration production
 
 FROM publish AS final
 WORKDIR "/app"
-ENTRYPOINT ["ng", "serve", "--port", "8443", "--host", "0.0.0.0", "--public-host", "homestation.robertmut.ovh", "--disable-host-check"]
+ENTRYPOINT ["ng", "serve", "--port", "8443", "--host", "0.0.0.0", "--disable-host-check"]

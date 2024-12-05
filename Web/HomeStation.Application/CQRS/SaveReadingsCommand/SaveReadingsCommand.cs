@@ -1,5 +1,4 @@
 ﻿using HomeStation.Domain.Common.Interfaces;
-using Newtonsoft.Json;
 
 namespace HomeStation.Application.CQRS.SaveReadingsCommand;
 

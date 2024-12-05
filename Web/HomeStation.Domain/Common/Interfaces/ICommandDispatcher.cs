@@ -1,6 +1,4 @@
-﻿using System.Windows.Input;
-
-namespace HomeStation.Domain.Common.Interfaces;
+﻿namespace HomeStation.Domain.Common.Interfaces;
 
 /// <summary>
 /// The command dispatcher interface

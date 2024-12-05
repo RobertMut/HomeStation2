@@ -1,9 +1,7 @@
-﻿using System.Globalization;
-using HomeStation.Application.Common.Exceptions;
+﻿using HomeStation.Application.Common.Exceptions;
 using HomeStation.Application.Common.Interfaces;
 using HomeStation.Domain.Common.Entities;
 using HomeStation.Domain.Common.Interfaces;
-using Microsoft.Data.SqlClient;
 
 namespace HomeStation.Application.CQRS.SaveReadingsCommand;
 

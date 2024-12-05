@@ -1,8 +1,6 @@
-﻿using HomeStation.Application.Common.Enums;
+﻿namespace HomeStation.Application.Common.Options;
 
-namespace HomeStation.Application.Common.Options;
-
-public class MQTTOptions
+public class MqttOptions
 {
     public const string MQTT = "MQTT";
     

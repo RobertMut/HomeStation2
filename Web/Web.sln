@@ -3,15 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeStation.Web", "HomeStation.Web\HomeStation.Web.csproj", "{9570A9D2-4949-4296-9394-BAC5EE1189EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeStation.Web", "HomeStation.Web\HomeStation.Web.csproj", "{9570A9D2-4949-4296-9394-BAC5EE1189EA}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "web.client", "web.client\web.client.esproj", "{61E40D1B-8A8D-4908-8913-C642333BB93F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeStation.Application", "HomeStation.Application\HomeStation.Application.csproj", "{A268671D-9183-4180-88BF-5320F89D7AA0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeStation.Application", "HomeStation.Application\HomeStation.Application.csproj", "{A268671D-9183-4180-88BF-5320F89D7AA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeStation.Domain", "HomeStation.Domain\HomeStation.Domain.csproj", "{01B863A4-A6CB-47B7-B87B-F203780AB569}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeStation.Domain", "HomeStation.Domain\HomeStation.Domain.csproj", "{01B863A4-A6CB-47B7-B87B-F203780AB569}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeStation.Infrastructure", "HomeStation.Infrastructure\HomeStation.Infrastructure.csproj", "{E49164AF-126E-4EF2-AF92-A6DE52A67ABF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HomeStation.Infrastructure", "HomeStation.Infrastructure\HomeStation.Infrastructure.csproj", "{E49164AF-126E-4EF2-AF92-A6DE52A67ABF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C69E0CD8-F926-4921-8250-58E045A737E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeStation.Application", "Tests\HomeStation.Application\HomeStation.Application.csproj", "{403DA7A7-6521-4022-A322-5DABF99FBA85}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeStation.Infrastructure", "Tests\HomeStation.Infrastructure\HomeStation.Infrastructure.csproj", "{410780DB-AA79-4D65-B2A1-3696F2AF528E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeStation.Web", "Tests\HomeStation.Web\HomeStation.Web.csproj", "{FEF5F1C4-14BF-4630-A15F-14F8E0D3CD54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeStation.Domain", "Tests\HomeStation.Domain\HomeStation.Domain.csproj", "{A753228A-E24D-4422-AD9B-989FC1A0050B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,9 +51,31 @@ Global
 		{E49164AF-126E-4EF2-AF92-A6DE52A67ABF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E49164AF-126E-4EF2-AF92-A6DE52A67ABF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E49164AF-126E-4EF2-AF92-A6DE52A67ABF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{403DA7A7-6521-4022-A322-5DABF99FBA85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{403DA7A7-6521-4022-A322-5DABF99FBA85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{403DA7A7-6521-4022-A322-5DABF99FBA85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{403DA7A7-6521-4022-A322-5DABF99FBA85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{410780DB-AA79-4D65-B2A1-3696F2AF528E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{410780DB-AA79-4D65-B2A1-3696F2AF528E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{410780DB-AA79-4D65-B2A1-3696F2AF528E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{410780DB-AA79-4D65-B2A1-3696F2AF528E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEF5F1C4-14BF-4630-A15F-14F8E0D3CD54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEF5F1C4-14BF-4630-A15F-14F8E0D3CD54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEF5F1C4-14BF-4630-A15F-14F8E0D3CD54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEF5F1C4-14BF-4630-A15F-14F8E0D3CD54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A753228A-E24D-4422-AD9B-989FC1A0050B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A753228A-E24D-4422-AD9B-989FC1A0050B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A753228A-E24D-4422-AD9B-989FC1A0050B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A753228A-E24D-4422-AD9B-989FC1A0050B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{403DA7A7-6521-4022-A322-5DABF99FBA85} = {C69E0CD8-F926-4921-8250-58E045A737E5}
+		{410780DB-AA79-4D65-B2A1-3696F2AF528E} = {C69E0CD8-F926-4921-8250-58E045A737E5}
+		{FEF5F1C4-14BF-4630-A15F-14F8E0D3CD54} = {C69E0CD8-F926-4921-8250-58E045A737E5}
+		{A753228A-E24D-4422-AD9B-989FC1A0050B} = {C69E0CD8-F926-4921-8250-58E045A737E5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B923123D-1025-45CF-B111-C65860BD8FDD}

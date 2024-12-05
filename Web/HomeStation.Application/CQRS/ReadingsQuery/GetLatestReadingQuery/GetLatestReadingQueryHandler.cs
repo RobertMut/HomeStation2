@@ -2,9 +2,8 @@
 using HomeStation.Application.Common.Interfaces;
 using HomeStation.Domain.Common.Entities;
 using HomeStation.Domain.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
-namespace HomeStation.Application.CQRS.GetLatestReadingQuery;
+namespace HomeStation.Application.CQRS.ReadingsQuery;
 
 /// <summary>
 /// The class to get latest reading

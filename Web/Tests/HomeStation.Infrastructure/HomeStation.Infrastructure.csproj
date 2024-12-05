@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+        <AssemblyName>HomeStation.Infrastructure.Tests</AssemblyName>
+        <RootNamespace>HomeStation.Infrastructure.Tests</RootNamespace>
+        <PackageId>HomeStation.Infrastructure.Tests</PackageId>
+        <Authors>HomeStation.Infrastructure.Tests</Authors>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentAssertions" Version="6.12.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+        <PackageReference Include="Moq" Version="4.20.72" />
+        <PackageReference Include="NUnit" Version="4.2.2" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+        <PackageReference Include="NUnit.Analyzers" Version="3.6.1"/>
+        <PackageReference Include="coverlet.collector" Version="6.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\HomeStation.Infrastructure\HomeStation.Infrastructure.csproj" />
+    </ItemGroup>
+
+</Project>

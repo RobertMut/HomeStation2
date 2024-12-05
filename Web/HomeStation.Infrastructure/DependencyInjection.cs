@@ -1,4 +1,4 @@
-﻿using System.Net;
+﻿using System.Diagnostics.CodeAnalysis;
 using HomeStation.Application.Common.Enums;
 using HomeStation.Application.Common.Interfaces;
 using HomeStation.Application.Common.Options;
@@ -12,13 +12,14 @@ using MQTTnet.AspNetCore;
 
 namespace HomeStation.Infrastructure;
 
+[ExcludeFromCodeCoverage]
 public static partial class DependencyInjection
 {
     public static async Task<IServiceCollection> AddInfrastructure(this IServiceCollection services)
     {
         ServiceProvider serviceProvider = services.BuildServiceProvider();
         DatabaseOptions? databaseOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
-        MQTTOptions mqttOptions = serviceProvider.GetRequiredService<IOptions<MQTTOptions>>().Value;
+        MqttOptions mqttOptions = serviceProvider.GetRequiredService<IOptions<MqttOptions>>().Value;
         
         services.AddDbContext<AirDbContext>(options =>
         {
@@ -34,7 +35,7 @@ public static partial class DependencyInjection
                     options.UseNpgsql(databaseOptions.ConnectionString);
                     break;
                 default:
-                    throw new NotSupportedException($"Database type {databaseOptions.DatabaseType} not supported");
+                    throw new NotSupportedException($"Database type {databaseOptions?.DatabaseType} not supported");
             }
         });
 

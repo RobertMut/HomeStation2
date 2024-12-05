@@ -1,9 +1,11 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using HomeStation.Domain.Common.CQRS;
 using HomeStation.Domain.Common.Interfaces;
 
 namespace HomeStation.Application;
 
+[ExcludeFromCodeCoverage]
 public static partial class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)

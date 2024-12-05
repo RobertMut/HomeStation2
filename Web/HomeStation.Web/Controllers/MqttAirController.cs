@@ -1,7 +1,5 @@
-﻿using HomeStation.Application.CQRS;
-using HomeStation.Application.CQRS.SaveReadingsCommand;
+﻿using HomeStation.Application.CQRS.SaveReadingsCommand;
 using HomeStation.Domain.Common.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using MQTTnet.AspNetCore.Routing;
 using MQTTnet.AspNetCore.Routing.Attributes;
 

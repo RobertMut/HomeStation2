@@ -5,7 +5,7 @@ using HomeStation.Domain.Common.Entities;
 using HomeStation.Domain.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace HomeStation.Application.CQRS.ReadingsQuery.GetReadingsQuery;
+namespace HomeStation.Application.CQRS.ReadingsQuery;
 
 /// <summary>
 /// The class for getting readings
@@ -107,7 +107,7 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
             return airQualityReadings.Select(x => new ReadingsWebModel
             {
                 DeviceId = query.DeviceId,
-                Pm1_0 = x?.Pm1_0,
+                Pm1_0 = x.Pm1_0,
                 Pm2_5 = x?.Pm2_5,
                 Pm10 = x?.Pm10,
                 ReadDate = x.Reading.Date
@@ -149,7 +149,7 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
     /// <param name="readings">The optional <see cref="IEnumerable{ReadingsWebModel}"/> of <see cref="ReadingsWebModel"/></param>
     /// <param name="detailLevel">The <see cref="DetailLevel"/> enumerable.</param>
     /// <returns>The <see cref="IEnumerable{ReadingsWebModel}"/> of <see cref="ReadingsWebModel"/>.</returns>
-    private IEnumerable<ReadingsWebModel>? LimitDataCount(IEnumerable<ReadingsWebModel>? readings, DetailLevel detailLevel)
+    private static IEnumerable<ReadingsWebModel>? LimitDataCount(IEnumerable<ReadingsWebModel>? readings, DetailLevel detailLevel)
     {
         if (readings == null || !readings.Any())
         {
@@ -181,7 +181,7 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
     /// <returns>The limited <see cref="IEnumerable{ReadingsWebModel}"/> of <see cref="ReadingsWebModel"/>.</returns>
     private static IEnumerable<ReadingsWebModel>? GetNth(List<ReadingsWebModel> readings, int step)
     {
-        for (int i = 0; i < readings.Count(); i += step)
+        for (int i = 0; i < readings.Count; i += step)
         {
             yield return readings[i];
         }

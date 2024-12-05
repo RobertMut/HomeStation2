@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace HomeStation.Application.CQRS.ReadingsQuery.GetReadingsQuery;
+namespace HomeStation.Application.CQRS.ReadingsQuery;
 
 public class GetReadingsQuery
 {
