@@ -1,0 +1,23 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.mat-icon {
+  vertical-align: middle;
+}
+
+.exception {
+  font-size: large;
+  color: #b6b6b6;
+  vertical-align: middle;
+  padding-top: 3%;
+  padding-bottom: 3%;
+}
+
+.exception mat-icon {
+  font-size: 70px;
+  vertical-align: middle;
+  width: auto;
+  padding-bottom: 7.5%;
+}

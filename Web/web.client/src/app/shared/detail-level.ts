@@ -1,8 +1,8 @@
 
 export enum DetailLevel {
-  Detailed,
-  Normal,
-  Less
+  Detailed = "Detailed",
+  Normal = "Normal",
+  Less = "Less"
 }
 
 export interface Details {

@@ -15,7 +15,7 @@ export class DevicesService {
   constructor(private http: HttpClient) { }
 
   public getDevices() : Observable<Device[]> {
-    return this.http.get<Device[]>(api)
+    return this.http.get<Device[]>(api);
   }
 
   public approveRevokeDevice(device: DeviceQuery){
@@ -27,7 +27,7 @@ export class DevicesService {
     this.http.put(api + 'approve', body).subscribe({
       next(_) { },
       error(msg){
-        console.log(msg);
+        console.error(msg);
       }
     })
   }

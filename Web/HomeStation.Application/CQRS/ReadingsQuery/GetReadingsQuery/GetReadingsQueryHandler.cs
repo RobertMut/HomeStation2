@@ -56,41 +56,13 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
     private async Task<Device?> GetData(GetReadingsQuery query, CancellationToken cancellationToken)
     {
         using IUnitOfWork unitOfWork = _unitOfWork;
-        Device? device;
-        
-        switch (query.ReadingType)
-        {
-            case ReadingType.Quality:
-                device = await unitOfWork.DeviceRepository.GetObjectBy(x => x.Id == query.DeviceId,
-                    i => i
-                        .Include(x => x.AirQuality.Where(y => 
-                            query.StartDate < y.Reading.Date &&
-                            y.Reading.Date < query.EndDate)), 
-                    cancellationToken);
-                break;
-            case ReadingType.Climate:
-                device = await unitOfWork.DeviceRepository.GetObjectBy(x => x.Id == query.DeviceId,
-                    i => i
-                        .Include(x => x.Climate.Where(y => 
-                            query.StartDate < y.Reading.Date &&
-                            y.Reading.Date < query.EndDate)), 
-                    cancellationToken);
-                break;
-            case ReadingType.Complete:
-                device = await unitOfWork.DeviceRepository.GetObjectBy(x => x.Id == query.DeviceId,
-                    i => i
-                        .Include(x => x.Climate.Where(y => 
-                            query.StartDate < y.Reading.Date &&
-                            y.Reading.Date < query.EndDate))
-                        .Include(x => x.AirQuality.Where(y => 
-                            query.StartDate < y.Reading.Date &&
-                            y.Reading.Date < query.EndDate)), 
-                    cancellationToken);
-                break;
-            default: throw new UnknownReadingException(query.ReadingType, "Unknown reading type");
-        }
 
-        return device;
+        return await unitOfWork.DeviceRepository.GetObjectBy(
+            x => x.Id == query.DeviceId,
+            i => i
+                .Include(x => x.Climate.Where(y => query.StartDate < y.Reading.Date && y.Reading.Date < query.EndDate))
+                .Include(x => x.AirQuality.Where(y => query.StartDate < y.Reading.Date && y.Reading.Date < query.EndDate)),
+            cancellationToken);
     }
     
     /// <summary>

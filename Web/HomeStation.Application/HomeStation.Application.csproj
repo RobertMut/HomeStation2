@@ -8,7 +8,10 @@
         <AssemblyName>HomeStation.Application</AssemblyName>
         <RootNamespace>HomeStation.Application</RootNamespace>
     </PropertyGroup>
-
+    <PropertyGroup>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    </PropertyGroup>
     <ItemGroup>
       <None Remove="Properties\launchSettings.json" />
       <None Remove="obj\**" />
@@ -16,7 +19,8 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.4" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="Scrutor" Version="4.2.2" />
     </ItemGroup>

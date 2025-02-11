@@ -3,16 +3,17 @@
 FROM node:18-slim AS base
 ENV NG_CLI_ANALYTICS="false"
 WORKDIR "/app"
-EXPOSE $WEB_HTTP_PORT
 RUN npm install -g @angular/cli
 
 FROM base AS publish
-COPY ./ ./
-WORKDIR "/app"
+ARG TARGET_URL
+ENV TARGET_URL=$TARGET_URL
+COPY . .
+WORKDIR "/app/web.client"
 ARG BUILD_CONFIGURATION=Release
 RUN npm install
-RUN ng build --configuration production
+RUN ng build --configuration production --optimization
 
-FROM publish AS final
-WORKDIR "/app"
-ENTRYPOINT ["ng", "serve", "--port", "8443", "--host", "0.0.0.0", "--disable-host-check"]
+FROM nginx:stable-alpine AS final
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=publish /app/dist/web.client/browser /usr/share/nginx/html

@@ -13,3 +13,7 @@
 /device/.pio/
 /device/.vscode/
 /device/build/
+/Web/Tests/HomeStation.Application/bin/
+/Web/Tests/HomeStation.Application/obj/
+/Web/Tests/HomeStation.Infrastructure/obj/
+/Web/Tests/HomeStation.Infrastructure/bin/

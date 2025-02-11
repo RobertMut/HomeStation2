@@ -7,6 +7,9 @@ import {CurrentComponent} from "./current/current.component";
 
 const routes: Routes = [
   {
+    path: '', redirectTo: '/current', pathMatch: 'full'
+  },
+  {
     path: 'current',
     component: CurrentComponent
   },

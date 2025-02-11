@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HomeStation.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialMerged : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,7 @@ namespace HomeStation.Infrastructure.Persistence.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    IsKnown = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -34,9 +34,6 @@ namespace HomeStation.Infrastructure.Persistence.Migrations
                     Pm2_5 = table.Column<int>(type: "int", nullable: false),
                     Pm10 = table.Column<int>(type: "int", nullable: false),
                     Pm1_0 = table.Column<int>(type: "int", nullable: false),
-                    Reading_Month = table.Column<int>(type: "int", nullable: false),
-                    Reading_Week = table.Column<int>(type: "int", nullable: false),
-                    Reading_Day = table.Column<int>(type: "int", nullable: false),
                     Reading_Date = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -59,9 +56,6 @@ namespace HomeStation.Infrastructure.Persistence.Migrations
                     Temperature = table.Column<double>(type: "float", nullable: false),
                     Humidity = table.Column<double>(type: "float", nullable: false),
                     Pressure = table.Column<double>(type: "float", nullable: false),
-                    Reading_Month = table.Column<int>(type: "int", nullable: false),
-                    Reading_Week = table.Column<int>(type: "int", nullable: false),
-                    Reading_Day = table.Column<int>(type: "int", nullable: false),
                     Reading_Date = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>

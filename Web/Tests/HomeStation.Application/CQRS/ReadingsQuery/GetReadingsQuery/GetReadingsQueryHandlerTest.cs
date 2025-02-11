@@ -92,106 +92,6 @@ public class GetReadingsQueryHandlerTest
                 DetailLevel = DetailLevel.Detailed,
                 StartDate = DateTimeOffset.Now.AddDays(-1),
                 EndDate = DateTimeOffset.Now.AddDays(1),
-                ReadingType = ReadingType.Complete
-            },
-            CancellationToken.None);
-
-        result.Should().BeEquivalentTo(expected);
-    }
-
-    [Test]
-    public async Task HandlerShouldReturnTemperatureHumidityOnly()
-    {
-        DateTimeOffset now = new DateTimeOffset();
-        deviceRepository.Setup(x => x.GetObjectBy(It.IsAny<Func<Device?, bool>>(),
-                It.IsAny<Func<IQueryable<Device>, IIncludableQueryable<Device, object>>>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Device()
-            {
-                Id = 1,
-                IsKnown = true,
-                Climate = new[]
-                {
-                    new Climate
-                    {
-                        DeviceId = 1,
-                        Temperature = 4,
-                        Humidity = 5,
-                        Pressure = 6,
-                        Reading = new Reading() { Date = now },
-                    }
-                }
-            });
-
-        List<ReadingsWebModel> expected = new List<ReadingsWebModel>()
-        {
-            new()
-            {
-                DeviceId = 1,
-                Humidity = 5,
-                Pressure = 6,
-                Temperature = 4,
-                ReadDate = now
-            }
-        };
-
-        IEnumerable<ReadingsWebModel>? result = await handler.Handle(
-            new GetReadingsQuery()
-            {
-                DeviceId = 1,
-                DetailLevel = DetailLevel.Detailed,
-                StartDate = DateTimeOffset.Now.AddDays(-1),
-                EndDate = DateTimeOffset.Now.AddDays(1),
-                ReadingType = ReadingType.Climate
-            },
-            CancellationToken.None);
-
-        result.Should().BeEquivalentTo(expected);
-    }
-
-    [Test] 
-    public async Task HandlerShouldReturnAirQualityOnly()
-    {
-        DateTimeOffset now = new DateTimeOffset();
-        deviceRepository.Setup(x => x.GetObjectBy(It.IsAny<Func<Device?, bool>>(),
-                It.IsAny<Func<IQueryable<Device>, IIncludableQueryable<Device, object>>>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Device()
-            {
-                Id = 1,
-                IsKnown = true,
-                AirQuality = new[]
-                {
-                    new Quality
-                    {
-                        DeviceId = 1,
-                        Pm2_5 = 15,
-                        Pm10 = 16,
-                        Pm1_0 = 17,
-                        Reading = new Reading() { Date = now },
-                    }
-                },
-            });
-
-        List<ReadingsWebModel> expected = new List<ReadingsWebModel>()
-        {
-            new()
-            {
-                DeviceId = 1,
-                Pm2_5 = 15,
-                Pm10 = 16,
-                Pm1_0 = 17,
-                ReadDate = now
-            }
-        };
-        
-        IEnumerable<ReadingsWebModel>? result = await handler.Handle(new GetReadingsQuery()
-            {
-                DeviceId = 1,
-                DetailLevel = DetailLevel.Detailed,
-                StartDate = DateTimeOffset.Now.AddDays(-1),
-                EndDate = DateTimeOffset.Now.AddDays(1),
-                ReadingType = ReadingType.Quality
             },
             CancellationToken.None);
 
@@ -220,7 +120,6 @@ public class GetReadingsQueryHandlerTest
                 DetailLevel = DetailLevel.Detailed,
                 StartDate = DateTimeOffset.Now.AddDays(-100),
                 EndDate = DateTimeOffset.Now.AddDays(-99),
-                ReadingType = ReadingType.Complete
             },
             CancellationToken.None);
 
@@ -239,7 +138,6 @@ public class GetReadingsQueryHandlerTest
             {
                 DeviceId = 1,
                 DetailLevel = DetailLevel.Detailed,
-                ReadingType = ReadingType.Complete
             },
             CancellationToken.None);
 
@@ -259,7 +157,6 @@ public class GetReadingsQueryHandlerTest
             {
                 DeviceId = 1,
                 DetailLevel = DetailLevel.Detailed,
-                ReadingType = (ReadingType)15
             },
             CancellationToken.None);
 

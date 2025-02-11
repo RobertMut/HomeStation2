@@ -8,7 +8,10 @@
         <AssemblyName>HomeStation.Domain</AssemblyName>
         <RootNamespace>HomeStation.Domain</RootNamespace>
     </PropertyGroup>
-
+    <PropertyGroup>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    </PropertyGroup>
     <ItemGroup>
       <None Remove="Properties\launchSettings.json" />
       <None Remove="obj\**" />

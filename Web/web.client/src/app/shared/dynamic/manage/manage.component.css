@@ -1,3 +1,33 @@
-.mat-icon {
+.with-icon button .mat-icon {
   cursor: pointer;
+}
+
+.with-icon{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  --mat-icon-button-hover-state-layer-opacity: 0;
+}
+
+.with-icon div, .with-icon button{
+  height: 20px;
+  font-size: 20px !important;
+  vertical-align: center;
+  line-height: 20px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.exception mat-icon {
+  cursor: unset;
+  font-size: 30px;
+}
+
+.exception{
+  font-size: 15px;
+  padding-left: 1%;
+  padding-right: 1%;
 }

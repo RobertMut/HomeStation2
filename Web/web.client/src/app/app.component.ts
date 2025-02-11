@@ -19,7 +19,7 @@ export class AppComponent implements OnInit{
       { label: 'Current', link: './current', index: 0 },
       { label: 'Temperature and Humidity', link: './temperature-humidity', index: 1 },
       { label: 'Pressure', link: './pressure', index: 2 },
-      { label: 'AirQuality', link: './air-quality', index: 3 }
+      { label: 'Air Quality', link: './air-quality', index: 3 }
     ];
   }
   ngOnInit(): void {

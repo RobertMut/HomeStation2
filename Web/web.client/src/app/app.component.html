@@ -11,7 +11,7 @@
       (click)="drawer.toggle()">
       menu
     </mat-icon>
-    <a mat-tab-link
+    <a mat-tab-link testid="label"
        *ngFor="let link of links"
        [routerLink]="link.link"
        routerLinkActive #rla="routerLinkActive"
@@ -19,7 +19,7 @@
       {{link.label}}
     </a>
   </nav>
-  <router-outlet ></router-outlet>
+  <router-outlet></router-outlet>
 </mat-drawer-container>
 
 

@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeStation.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AirDbContext))]
-    [Migration("20240320125417_AddDeviceApproval")]
-    partial class AddDeviceApproval
+    [Migration("20250206131559_InitialMerged")]
+    partial class InitialMerged
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.3")
+                .HasAnnotation("ProductVersion", "9.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -111,15 +111,6 @@ namespace HomeStation.Infrastructure.Persistence.Migrations
                             b1.Property<DateTimeOffset>("Date")
                                 .HasColumnType("datetimeoffset");
 
-                            b1.Property<int>("Day")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Month")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Week")
-                                .HasColumnType("int");
-
                             b1.HasKey("ClimateId");
 
                             b1.ToTable("Climate");
@@ -149,15 +140,6 @@ namespace HomeStation.Infrastructure.Persistence.Migrations
 
                             b1.Property<DateTimeOffset>("Date")
                                 .HasColumnType("datetimeoffset");
-
-                            b1.Property<int>("Day")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Month")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Week")
-                                .HasColumnType("int");
 
                             b1.HasKey("QualityId");
 

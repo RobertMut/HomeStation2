@@ -68,20 +68,7 @@ public abstract class DesignTimeDbContextFactoryBase<TContext> : IDesignTimeDbCo
             throw new ArgumentException($"Connection string is null or empty", nameof(connectionString));
         }
 
-        var optionsBuilder = new DbContextOptionsBuilder<TContext>();
-        
-        switch (_databaseOptions?.DatabaseType)
-        {
-            case DatabaseType.SqlServer:
-                optionsBuilder.UseSqlServer(connectionString);
-                break;
-            case DatabaseType.PostgreSql:
-                optionsBuilder.UseNpgsql(connectionString);
-                break;
-            case DatabaseType.MySql:
-                optionsBuilder.UseMySql(connectionString, ServerVersion.Parse(_databaseOptions.MySqlVersion));
-                break;
-        }
+        DbContextOptionsBuilder<TContext> optionsBuilder = new DbContextOptionsBuilder<TContext>().UseSqlServer(connectionString);
 
         return CreateNewInstance(optionsBuilder.Options);
     }

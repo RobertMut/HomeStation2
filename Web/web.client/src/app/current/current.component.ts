@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {DevicesService} from "../shared/services/devices.service";
 import {Device} from "../shared/interfaces/device";
-import {Observable, delay, of, startWith } from 'rxjs';
+import {Observable, delay, of, startWith, filter} from 'rxjs';
 import {Readings} from "../shared/interfaces/readings";
 import {StorageService} from "../shared/services/storage.service";
 import {ReadingsService} from "../shared/services/readings.service";
@@ -15,7 +15,7 @@ export class CurrentComponent implements OnInit {
 
   protected devices: Observable<Array<Device>> = of([]);
   protected device: Device = {} as Device;
-  protected reading: Observable<Readings> = of({} as Readings);
+  protected reading: Readings | undefined;
   protected loaded: boolean = false;
   protected interval: any | undefined;
 
@@ -38,16 +38,15 @@ export class CurrentComponent implements OnInit {
     let storedDevice = this.storage.getLastSelectedDeviceId();
     if(storedDevice != undefined){
       this.interval = setInterval(() => {
-        this.getReading({ id: storedDevice } as Device);
+        this.getReading({ id: storedDevice,  } as Device);
       }, 20000);
+
+      this.loaded = true;
     }
   }
 
   getDevices() {
-    this.devices = this.service.getDevices().pipe(
-      delay(2000),
-      startWith([])
-    );
+    this.devices = this.service.getDevices();
   }
 
   getReading(device: Device){
@@ -64,12 +63,15 @@ export class CurrentComponent implements OnInit {
         this.getReading({ id: device.id } as Device);
       }, 20000);
     }
-
-    this.loaded = true;
   }
 
   private getData(deviceId: number){
-    this.reading = this.readingsService.getLatestReading(deviceId)
+    this.readingsService.getLatestReading(deviceId)
+        .subscribe({
+          next: v => this.reading = v,
+          complete: () => this.loaded = true,
+          error: err => { console.error(err)}
+        })
     this.storage.setLastSelectedDevice(deviceId);
   }
 }

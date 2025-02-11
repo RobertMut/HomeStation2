@@ -1,4 +1,12 @@
-<ng-container>
-  <canvas id="chart" appChartComponentBase></canvas>
-</ng-container>
-<app-data-picker (onSubmit)="getReadings($event, ReadingType.Quality, GraphType.AirQuality)"/>
+<ng-container *ngIf="(readings.length != 0); then chart; else exception"/>
+<ng-template #chart>
+    <canvas *ngIf="readings.length != 0" id="chart" appChartComponentBase></canvas>
+</ng-template>
+<ng-template #exception>
+    <div class="exception">
+        <mat-icon>insights</mat-icon>
+        <p>No air quality data!</p>
+        <p>Please select device, date and data detail level to continue..</p>
+    </div>
+</ng-template>
+<app-data-picker (onSubmit)="getReadings($event)"/>

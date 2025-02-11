@@ -8,7 +8,7 @@ const PROXY_CONFIG = [
       "/api/**",
     ],
     target: target,
-    secure: false
+    secure: false,
   }
 ]
 
