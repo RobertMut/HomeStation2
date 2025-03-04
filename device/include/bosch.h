@@ -7,7 +7,7 @@
 class Bosch{
     private:
         uint8_t _dev_addr;
-        uint32_t* _period = 0;
+        uint32_t* _period;
         bme280_dev* _bme;
         bme280_data* _data;
         bme280_settings* _settings;
@@ -20,7 +20,8 @@ class Bosch{
         void init();
         void reset();
         void set_mode(uint8_t mode);
-        bme280_data* getData();
+        bme280_data* getDataNormalMode();
+        bme280_data* getDataForcedMode();
 };
 
 #endif //HOME_STATION_BOSCH_H
