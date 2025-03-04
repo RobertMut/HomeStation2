@@ -59,7 +59,7 @@ pm_data_t* PMS3003::pms_uart_read()
             decoded_data->fail = true;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(750));
 
         retry++;
     } while(decoded_data->fail || retry < 50);

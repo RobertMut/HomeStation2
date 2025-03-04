@@ -38,7 +38,7 @@
 
 void Bosch::delay_us(uint32_t period, void *intf_ptr)
 {
-    ets_delay_us(period * 1000);
+    vTaskDelay(pdMS_TO_TICKS(period));
 }
 
 Bosch::Bosch(const gpio_num_t sda, const gpio_num_t scl)

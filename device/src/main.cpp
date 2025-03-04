@@ -47,10 +47,9 @@ bool IRAM_ATTR i2c_init(uint8_t dev_addr)
     i2c_config->mode = I2C_MODE_MASTER,
     i2c_config->sda_io_num = GPIO_NUM_21,
     i2c_config->scl_io_num = GPIO_NUM_22,
-    i2c_config->sda_pullup_en = GPIO_PULLUP_ENABLE,
-    i2c_config->scl_pullup_en = GPIO_PULLUP_ENABLE,
+    i2c_config->sda_pullup_en = GPIO_PULLUP_DISABLE,
+    i2c_config->scl_pullup_en = GPIO_PULLUP_DISABLE,
     i2c_config->master.clk_speed = 10000;
-    i2c_config->clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL;
 
     i2c_param_config(I2C_NUM_0, i2c_config);
     i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0);
@@ -140,7 +139,19 @@ int8_t IRAM_ATTR user_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len
 }
 
 static void print_data(data_t* data){
-    
+    if(!data){
+        ESP_LOGE("LCD", "LCD data NULL!");
+        
+        return;
+    }
+
+    if (data->temperature == NULL ||
+        data->pm2_5 == NULL || data-> pm2_5 < 0) {
+        ESP_LOGE("LCD", "Invalid data");
+        
+        return;
+    }
+
     ESP_LOGI("LCD", "LCD Begin");
     lcd_handle->clear();
     lcd_handle->moveCursor(0, 0);
@@ -151,6 +162,7 @@ static void print_data(data_t* data){
     lcd_handle->write(string_format("PM2.5: %hhu, PM10: %hhu", data->pm2_5, data->pm10).c_str());
     lcd_handle->moveCursor(0, 3);
     lcd_handle->write(string_format("PM1: %hhu", data->pm1_0).c_str());
+    ESP_LOGI("LCD", "LCD Set");
 }
 
 static void pms_task(void *arg){
@@ -166,7 +178,7 @@ static void pms_task(void *arg){
             intertask::set_data(data);
         }
 
-        vTaskDelay(pdMS_TO_TICKS(10000));
+        vTaskDelay(pdMS_TO_TICKS(20000));
     }
 }
 
@@ -202,7 +214,7 @@ static void mqtt_task(void *arg){
         mqtt_client->send(TOPIC, data);
         mqtt_client->stop();
         intertask::clear_data();
-        vTaskDelay(pdMS_TO_TICKS(120000));
+        vTaskDelay(pdMS_TO_TICKS(90000));
     }
 }
 
@@ -241,7 +253,7 @@ extern "C" void app_main(void) {
         data->temperature = sensor_data->temperature;
         data->humidity = sensor_data->humidity;
         data->pressure = sensor_data->pressure;
-        
+
         print_data(data);
         vTaskDelay(pdMS_TO_TICKS(60000));
     }
