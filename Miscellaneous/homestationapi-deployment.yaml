@@ -1,0 +1,57 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f compose.yaml convert
+    kompose.version: 1.35.0 (9532ceef3)
+  name: homestationapi-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: homestationapi
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: homestationapi
+    spec:
+      containers:
+        - env:
+            - name: MQTT__Port
+              value: "1883"
+            - name: MQTT__Address
+              value: "0.0.0.0"
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "80"
+            - name: Database__ConnectionString
+              value: "" #example, move to secrets
+          image: 127.0.0.1:5000/homestation2-homestation-api:latest #specify image registry
+          name: homestationapi
+          ports:
+            - containerPort: 1883
+              protocol: TCP
+            - containerPort: 80
+              protocol: TCP
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: homestationapi
+  name: homestationapi
+spec:
+  type: LoadBalancer
+  ports:
+    - name: "1883"
+      port: 1883
+      protocol: TCP
+      nodePort: 31883
+      targetPort: 1883
+    - name: "80"
+      port: 80
+      protocol: TCP
+      nodePort: 31080
+      targetPort: 80
+  selector:
+    app.kubernetes.io/name: homestationapi

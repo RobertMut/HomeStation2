@@ -1,0 +1,95 @@
+﻿apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: sqlserver-data
+  namespace: homestation
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 5Gi
+  hostPath:
+    path: "/var/opt/mssql"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: sqlserver-claim
+  namespace: homestation
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f compose.yaml convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    app.kubernetes.io/name: homestationdb-deployment
+  name: homestationdb-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: homestationdb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f compose.yaml convert
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        app.kubernetes.io/name: homestationdb
+    spec:
+      containers:
+        - name: homestationdb
+          image: mcr.microsoft.com/mssql/rhel/server:2022-latest
+          ports:
+            - name: "1433port"
+              containerPort: 1433
+            - name: "1434port"
+              containerPort: 1434
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SA_PASSWORD
+              value: "P@ssword" #example, move to secrets
+          volumeMounts:
+            - name: sqlserver-data
+              mountPath: "/var/opt/mssql"
+      volumes:
+        - name: sqlserver-data
+          persistentVolumeClaim:
+            claimName: sqlserver-claim
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose -f compose.yaml convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    app.kubernetes.io/name: homestationdb
+  name: homestationdb
+spec:
+  type: NodePort
+  ports:
+    - name: "1433port"
+      port: 1433
+      targetPort: 1433
+      protocol: TCP
+      nodePort: 31433
+    - name: "1434port"
+      port: 1434
+      targetPort: 1434
+      protocol: UDP
+      nodePort: 31434
+  selector:
+    app.kubernetes.io/name: homestationdb

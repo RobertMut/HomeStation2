@@ -19,5 +19,12 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   font-size: 70px;
   vertical-align: middle;
   width: auto;
+}
+
+.pad-bott7_5 {
   padding-bottom: 7.5%;
+}
+
+.pad-bott15 {
+  padding-bottom: 15%;
 }

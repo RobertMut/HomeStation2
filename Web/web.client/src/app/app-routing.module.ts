@@ -1,34 +1,43 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import {TemperatureComponent} from "./temperature/temperature.component";
-import {PressureComponent} from "./pressure/pressure.component";
-import {AirQualityComponent} from "./air-quality/air-quality.component";
+import {NgModule} from '@angular/core';
+import {RouterModule, Routes} from '@angular/router';
 import {CurrentComponent} from "./current/current.component";
+import {GraphType} from "./shared/graph-type";
+import {ChartComponent} from "./shared/components/chart.component";
 
 const routes: Routes = [
-  {
-    path: '', redirectTo: '/current', pathMatch: 'full'
-  },
-  {
-    path: 'current',
-    component: CurrentComponent
-  },
-  {
-    path: 'temperature-humidity',
-    component: TemperatureComponent
-  },
-  {
-    path: 'pressure',
-    component: PressureComponent
-  },
-  {
-    path: 'air-quality',
-    component: AirQualityComponent
-  }
+    {
+        path: '', redirectTo: '/current', pathMatch: 'full'
+    },
+    {
+        path: 'current',
+        component: CurrentComponent
+    },
+    {
+        path: 'temperature-humidity',
+        component: ChartComponent,
+        data: {
+            graphType: GraphType.Temperature
+        }
+    },
+    {
+        path: 'pressure',
+        component: ChartComponent,
+        data: {
+            graphType: GraphType.Pressure
+        }
+    },
+    {
+        path: 'air-quality',
+        component: ChartComponent,
+        data: {
+            graphType: GraphType.AirQuality
+        }
+    }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forRoot(routes)],
+    exports: [RouterModule]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {
+}

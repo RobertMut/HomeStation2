@@ -26,19 +26,17 @@ services:
         build:
             context: ./Web
             dockerfile: Dockerfile
-            args:
-                ConnectionString: Data Source=homestationDb;Database=homestation;User Id=sa;Password=Pass@word;Encrypt=False;TrustServerCertificate=True
         ports:
             - "1883:1883"
             - "9081:80"
         networks:
             - homestation
         depends_on:
-            homestation_db:
+            homestation-db:
                 condition: service_started
         restart: always
     
-    homestation_web:
+    homestation-web:
         container_name: homestationWeb
         build:
             context: ./Web/web.client
@@ -48,7 +46,7 @@ services:
             - "9080:80"
             - "9443:443"
         depends_on:
-            - homestation_api
+            - homestation-api
         networks:
             - homestation
         restart: always

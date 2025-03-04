@@ -1,0 +1,55 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f compose.yaml convert
+    kompose.version: 1.35.0 (9532ceef3)
+  name: homestationweb-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: homestationweb
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose -f compose.yaml convert
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        app.kubernetes.io/name: homestationweb
+    spec:
+      containers:
+        - image: 127.0.0.1:5000/homestation2-homestation-web:latest #specify registry
+          name: homestationweb
+          ports:
+            - name: "https"
+              containerPort: 443
+            - name: "http"
+              containerPort: 80
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose -f compose.yaml convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: homestationweb
+  name: homestationweb
+spec:
+  type: LoadBalancer
+  ports:
+    - name: "http"
+      port: 80
+      protocol: TCP
+      targetPort: 80
+      nodePort: 30080
+    - name: "https"
+      port: 443
+      protocol: TCP
+      targetPort: 443
+      nodePort: 30443
+  #  externalTrafficPolicy: Local
+  selector:
+    app.kubernetes.io/name: homestationweb

@@ -45,14 +45,14 @@ public class Repository<TEntity> where TEntity : class
     /// <returns>IEnumerable of entities</returns>
     public virtual IQueryable<TEntity> Get(Func<IQueryable<TEntity>, IQueryable<TEntity>> func)
     {
-        var query = _dbSet.AsQueryable();
+        var query = _dbSet.AsNoTracking().AsQueryable();
 
         if (func != null)
         {
             query = func(query);
         }
 
-        return query.AsNoTracking();
+        return query;
     }
     
     /// <summary>
@@ -62,7 +62,7 @@ public class Repository<TEntity> where TEntity : class
     /// <returns>IEnumerable of entities</returns>
     public virtual IQueryable<TEntity> GetAll(params Expression<Func<TEntity, object>>[] includeProperties)
     {
-        var query = _dbSet.AsQueryable();
+        var query = _dbSet.AsNoTracking().AsQueryable();
 
         if (includeProperties != null)
         {
@@ -85,7 +85,7 @@ public class Repository<TEntity> where TEntity : class
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include = null,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<TEntity> query = _dbSet.AsQueryable();
+        IQueryable<TEntity> query = _dbSet.AsNoTracking().AsQueryable();
 
         if (include != null)
         {
@@ -105,7 +105,7 @@ public class Repository<TEntity> where TEntity : class
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include = null,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<TEntity> query = _dbSet.AsQueryable();
+        IQueryable<TEntity> query = _dbSet.AsNoTracking().AsQueryable();
 
         if (include != null)
         {

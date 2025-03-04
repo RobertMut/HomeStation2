@@ -1,5 +1,5 @@
 export enum GraphType {
-  Pressure,
-  Temperature,
-  AirQuality
+  Pressure = "Pressure",
+  Temperature = "Temperature",
+  AirQuality = "AirQuality"
 }

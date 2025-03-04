@@ -44,7 +44,7 @@ describe('CurrentComponent', () => {
       declarations: [CurrentComponent],
       providers: [
         { provide: DevicesService, useValue: jasmine.createSpyObj('DevicesService', ["approveRevokeDevice", "getDevices"]) },
-        { provide: StorageService, useValue: jasmine.createSpyObj('StorageService', ["getLastSelectedDeviceId", "setLastSelectedDevice"]) },
+        { provide: StorageService, useValue: jasmine.createSpyObj('StorageService', ["getLastSelectedDevice", "setLastSelectedDevice"]) },
         { provide: ReadingsService, useValue: jasmine.createSpyObj('ReadingsService', ["getLatestReading"]) }
       ],
       imports: [      
@@ -77,9 +77,9 @@ describe('CurrentComponent', () => {
   });
   
   it('should initialize and fetch devices',() => {
-    const numb = Number(2);
+    const device = "Device 2";
     devicesServiceSpy.getDevices.and.returnValue(of(mockDevices));
-    storageServiceSpy.getLastSelectedDeviceId.and.returnValue(numb);
+    storageServiceSpy.getLastSelectedDevice.and.returnValue(device);
     readingsServiceSpy.getLatestReading.and.returnValue(of(reading));
     
     fixture.detectChanges();
@@ -95,11 +95,11 @@ describe('CurrentComponent', () => {
     let readDate = getItemByTestSelector('read-date', fixture)?.nativeElement.textContent;
     
     expect(devicesServiceSpy.getDevices).toHaveBeenCalledTimes(1);
-    expect(storageServiceSpy.getLastSelectedDeviceId).toHaveBeenCalledTimes(2);
-    expect(readingsServiceSpy.getLatestReading).toHaveBeenCalledTimes(1);
+    expect(storageServiceSpy.getLastSelectedDevice).toHaveBeenCalledTimes(1);
+    expect(readingsServiceSpy.getLatestReading).toHaveBeenCalledTimes(2);
     expect(temperature).toBe("30");
     expect(humidity).toBe("100");
-    expect(pressure).toBe("10");
+    expect(pressure).toBe("10.00");
     expect(pm10).toBe("0");
     expect(pm25).toBe("1");
     expect(pm1_0).toBe("2");
@@ -108,7 +108,7 @@ describe('CurrentComponent', () => {
 
   it('should initialize and be empty upon empty localStorage', () => {
     devicesServiceSpy.getDevices.and.returnValue(of(mockDevices));
-    storageServiceSpy.getLastSelectedDeviceId.and.returnValue(undefined);
+    storageServiceSpy.getLastSelectedDevice.and.returnValue(null);
 
     fixture.detectChanges();
     jasmine.clock().tick(20001);
@@ -124,7 +124,7 @@ describe('CurrentComponent', () => {
 
   it('should show warning message upon no devices', () => {
     devicesServiceSpy.getDevices.and.returnValue(of([]));
-    storageServiceSpy.getLastSelectedDeviceId.and.returnValue(undefined);
+    storageServiceSpy.getLastSelectedDevice.and.returnValue(null);
 
     fixture.detectChanges();
     jasmine.clock().tick(20001);
@@ -139,7 +139,7 @@ describe('CurrentComponent', () => {
 
   it('should show warning upon selected device but no data', () => {
     devicesServiceSpy.getDevices.and.returnValue(of(mockDevices));
-    storageServiceSpy.getLastSelectedDeviceId.and.returnValue(2);
+    storageServiceSpy.getLastSelectedDevice.and.returnValue("Device 2");
     readingsServiceSpy.getLatestReading.and.returnValue(of())
 
     fixture.detectChanges();

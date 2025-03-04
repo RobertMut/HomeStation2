@@ -5,7 +5,7 @@
       <app-manage/>
     </div>
   </mat-drawer>
-  <nav mat-tab-nav-bar>
+  <nav mat-tab-nav-bar [tabPanel]="tabPanel">
     <mat-icon
       *ngIf="!drawer.opened"
       (click)="drawer.toggle()">
@@ -19,7 +19,9 @@
       {{link.label}}
     </a>
   </nav>
-  <router-outlet></router-outlet>
+  <mat-tab-nav-panel #tabPanel>
+    <router-outlet></router-outlet>
+  </mat-tab-nav-panel>
 </mat-drawer-container>
 
 
