@@ -76,6 +76,10 @@ echo "server {
           root /usr/share/nginx/html;
           index index.html;
           location / {
+              proxy_pass http://127.0.0.1:30080/;
+              proxy_set_header Host \$host;
+              proxy_set_header X-Real-IP \$remote_addr;
+              proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
               return 301 https://\$host\$request_uri;
               proxy_read_timeout 1800;
               proxy_connect_timeout 1800;
