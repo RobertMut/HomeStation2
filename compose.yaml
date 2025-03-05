@@ -32,11 +32,11 @@ services:
         networks:
             - homestation
         depends_on:
-            homestation-db:
+            homestation_db:
                 condition: service_started
         restart: always
     
-    homestation-web:
+    homestation_web:
         container_name: homestationWeb
         build:
             context: ./Web/web.client
@@ -46,7 +46,7 @@ services:
             - "9080:80"
             - "9443:443"
         depends_on:
-            - homestation-api
+            - homestation_api
         networks:
             - homestation
         restart: always
