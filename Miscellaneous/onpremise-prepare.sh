@@ -20,28 +20,28 @@ mkdir ./data
 chmod -R +xr ./data
 if ! grep -q "127.0.0.1" /etc/docker/daemon.json;
 then 
-  echo "{ \
-          ""insecure-registries"": [], \
-          ""registry-mirrors"": [], \
-          ""insecure-registries"": [""127.0.0.1:5000""] \
-        }" > /etc/docker/daemon.json
+  printf '%s\n' '{' \
+          '"insecure-registries": [],'\
+          '"registry-mirrors": [],' \
+          '"insecure-registries": ["127.0.0.1:5000"]' \
+        '}' > /etc/docker/daemon.json
 fi
 
 if ! grep -q ":5000" /etc/docker/registry/config.yml;
 then 
-  echo "version: 0.1
-        log:
-          level: info
-          formatter: json
-          fields:
-            service: registry
-        storage:
-          cache:
-            layerinfo: inmemory
-          filesystem:
-            rootdirectory: /var/lib/registry
-        http:
-          addr: :5000" > /etc/docker/registry/config.yml
+  printf '%s\n' 'version: 0.1'\
+        'log:'\
+          'level: info'\
+          'formatter: json'\
+          'fields:'\
+            'service: registry'\
+        'storage:'\
+          'cache:'\
+            'layerinfo: inmemory'\
+          'filesystem:'\
+            'rootdirectory: /var/lib/registry' \
+        'http:' \
+          'addr: :5000' > /etc/docker/registry/config.yml
 fi
 
 sudo systemctl restart docker
@@ -69,29 +69,28 @@ sh ./deploy.sh
 
 echo "Prepare nginx"
 apt-get install nginx -y
-echo "server { 
-          listen 80 default_server;
-          listen [::]:80 default_server;
-          
-          root /usr/share/nginx/html;
-          index index.html;
-          location / {
-              proxy_pass http://127.0.0.1:30080/;
-              proxy_set_header Host \$host;
-              proxy_set_header X-Real-IP \$remote_addr;
-              proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-              return 301 https://\$host\$request_uri;
-              proxy_read_timeout 1800;
-              proxy_connect_timeout 1800;
-              proxy_send_timeout 1800;
-              send_timeout 1800;
-          }
-      }
-      server {
-          listen      443 ssl http2 default_server;
-          listen      [::]:443 ssl http2 default_server;
-          server_name     localhost;
-  
-          ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
-  
-      }" > /etc/nginx/conf.d/default.conf
+printf '%s\n' 'server {' \
+          'listen 80 default_server;'\
+          'listen [::]:80 default_server;'\
+          ''\
+          'root /usr/share/nginx/html;'\
+          'index index.html;'\
+          'location / {'\
+              'proxy_pass http://127.0.0.1:30080/;'\
+              'proxy_set_header Host $host;'\
+              'proxy_set_header X-Real-IP $remote_addr;'\
+              'proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;'\
+              'return 301 https://$host$request_uri;'\
+              'proxy_read_timeout 1800;'\
+              'proxy_connect_timeout 1800;'\
+              'proxy_send_timeout 1800;'\
+              'send_timeout 1800;'\
+          '}'\
+      '}'\
+      'server {'\
+          'listen      443 ssl http2 default_server;'\
+          'listen      [::]:443 ssl http2 default_server;'\
+          'server_name     localhost;'\
+          ''\
+          'ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;'\
+          '}' > /etc/nginx/conf.d/default.conf

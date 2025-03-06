@@ -8,6 +8,7 @@ import {ReadingsService} from "../shared/services/readings.service";
 
 @Component({
   selector: 'app-current',
+  standalone: false,
   templateUrl: './current.component.html',
   styleUrl: './current.component.css'
 })
