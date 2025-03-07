@@ -19,7 +19,7 @@ spec:
         app.kubernetes.io/name: homestationweb
     spec:
       containers:
-        - image: 127.0.0.1:5000/homestation2-homestation-web:latest #specify registry
+        - image: 127.0.0.1:5000/homestation2-homestation_web:latest #specify registry
           name: homestationweb
           ports:
             - name: "https"

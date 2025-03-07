@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using FluentAssertions;
 using HomeStation.Application.Common.Exceptions;
 using HomeStation.Application.Common.Interfaces;
@@ -39,10 +40,11 @@ public class GetLatestReadingQueryHandlerTest
     {
         DateTimeOffset now = DateTimeOffset.Now;
 
-        qualityRepository.Setup(x => x.GetLastBy(It.IsAny<Func<Quality?, bool>>(),
-                It.IsAny<Func<IQueryable<Quality>, IIncludableQueryable<Quality, object>>>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Quality()
+        qualityRepository.Setup(x => x.GetLastBy(
+                    It.IsAny<Expression<Func<Quality, bool>>>(),
+            It.IsAny<Expression<Func<Quality?, object>>>(),
+                It.IsAny<Func<IQueryable<Quality>, IIncludableQueryable<Quality, object>>>()))
+            .Returns(new Quality()
             {
                 DeviceId = 1,
                 Pm1_0 = 1,
@@ -50,10 +52,10 @@ public class GetLatestReadingQueryHandlerTest
                 Pm10 = 1,
                 Reading = new Reading() { Date = now }
             });
-        climateRepository.Setup(x => x.GetLastBy(It.IsAny<Func<Climate?, bool>>(),
-                It.IsAny<Func<IQueryable<Climate>, IIncludableQueryable<Climate, object>>>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Climate
+        climateRepository.Setup(x => x.GetLastBy(It.IsAny<Expression<Func<Climate, bool>>>(),
+            It.IsAny<Expression<Func<Climate?, object>>>(),
+                It.IsAny<Func<IQueryable<Climate>, IIncludableQueryable<Climate, object>>>()))
+            .Returns(new Climate
             {
                 DeviceId = 1,
                 Temperature = 2,
@@ -85,12 +87,14 @@ public class GetLatestReadingQueryHandlerTest
     [Test]
     public async Task ShouldThrowNoReadingsFoundException()
     {
-        qualityRepository.Setup(x => x.GetLastBy(It.IsAny<Func<Quality?, bool>>(),
-            It.IsAny<Func<IQueryable<Quality>, IIncludableQueryable<Quality, object>>>(),
-            It.IsAny<CancellationToken>())).ReturnsAsync(default(Quality));
-        climateRepository.Setup(x => x.GetLastBy(It.IsAny<Func<Climate?, bool>>(),
-            It.IsAny<Func<IQueryable<Climate>, IIncludableQueryable<Climate, object>>>(),
-            It.IsAny<CancellationToken>())).ReturnsAsync(default(Climate));
+        qualityRepository.Setup(x => x.GetLastBy(It.IsAny<Expression<Func<Quality?, bool>>>(),
+            It.IsAny<Expression<Func<Quality?, object>>>(),
+            It.IsAny<Func<IQueryable<Quality>, IIncludableQueryable<Quality, object>>>()))
+            .Returns(default(Quality));
+        climateRepository.Setup(x => x.GetLastBy(It.IsAny<Expression<Func<Climate?, bool>>>(),
+            It.IsAny<Expression<Func<Climate?, object>>>(),
+            It.IsAny<Func<IQueryable<Climate>, IIncludableQueryable<Climate, object>>>()))
+            .Returns(default(Climate));
         Func<Task> task = async () => await handler.Handle(new GetLatestReadingQuery()
         {
             DeviceId = 1
