@@ -38,7 +38,7 @@
 
 void Bosch::delay_us(uint32_t period, void *intf_ptr)
 {
-    vTaskDelay(pdMS_TO_TICKS(period));
+    ets_delay_us(period * 1000);
 }
 
 Bosch::Bosch(const gpio_num_t sda, const gpio_num_t scl)
@@ -102,20 +102,17 @@ IRAM_ATTR bme280_data* Bosch::getDataForcedMode()
     this->_data = new bme280_data();
     int8_t rslt = BME280_E_NULL_PTR;
     uint8_t idx = 0;
-    while (idx < 20) {
+    
+    while (rslt != BME280_OK && idx < 20) {
         ESP_LOGI(BME, "Measuring...");
         rslt = bme280_get_sensor_data(BME280_ALL, this->_data, this->_bme);
-
+    
         if (rslt != BME280_OK) {
             ESP_LOGE(BME, "Failed to get sensor data");
-            
             Bosch::delay_us(1000, NULL);
-            idx++;
-
-            continue;
         }
-
-        break;
+    
+        idx++;
     }
 
     ESP_LOGI(BME, "Measure done.");
