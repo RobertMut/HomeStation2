@@ -36,7 +36,7 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
 
         Device device = await GetData(query, cancellationToken);
 
-        IEnumerable<ReadingsWebModel>? readings = GetReadings(query, device.Climate, device.AirQuality);
+        IEnumerable<ReadingsWebModel> readings = GetReadings(query, device.Climate, device.AirQuality);
 
         return LimitDataCount(readings, query.DetailLevel)?.OrderBy(d => d.ReadDate);
     }
@@ -91,7 +91,7 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
     /// <param name="climateReadings">The optional <see cref="IEnumerable{Climate}"/> of <see cref="Climate"/>.</param>
     /// <param name="airQualityReadings">The optional <see cref="IEnumerable{Quality}"/> of <see cref="Quality"/>.</param>
     /// <returns>The <see cref="IEnumerable{ReadingsWebModel}"/> of <see cref="ReadingsWebModel"/>.</returns>
-    private static IEnumerable<ReadingsWebModel>? GetReadings(GetReadingsQuery query,
+    private static IEnumerable<ReadingsWebModel> GetReadings(GetReadingsQuery query,
         IEnumerable<Climate>? climateReadings, IEnumerable<Quality>? airQualityReadings)
     {
         if (climateReadings == null)
@@ -117,22 +117,30 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
                 ReadDate = x.Reading.Date
             });
         }
+        
+		Dictionary<DateTimeOffset, ReadingsWebModel> readings = climateReadings.ToDictionary(k => k.Reading.Date, v =>
+            new ReadingsWebModel()
+            {
+                DeviceId = query.DeviceId,
+                Temperature = v.Temperature,
+                Humidity = v.Humidity,
+                Pressure = v.Pressure,
+                ReadDate = v.Reading.Date
+            });
 
-        return from climate in climateReadings
-            join air in airQualityReadings
-                on climate?.DeviceId equals air?.DeviceId
-            select
-                new ReadingsWebModel
-                {
-                    DeviceId = query.DeviceId,
-                    Temperature = climate?.Temperature,
-                    Humidity = climate?.Humidity,
-                    Pressure = climate?.Pressure,
-                    Pm1_0 = air?.Pm1_0,
-                    Pm2_5 = air?.Pm2_5,
-                    Pm10 = air?.Pm10,
-                    ReadDate = air.Reading.Date
-                };
+        foreach (var airQuality in airQualityReadings)
+        {
+            if (!readings.TryGetValue(airQuality.Reading.Date, out ReadingsWebModel webModel))
+            {
+                continue;
+            }
+            
+            webModel.Pm1_0 = airQuality.Pm1_0;
+            webModel.Pm2_5 = airQuality.Pm2_5;
+            webModel.Pm10 = airQuality.Pm10;
+        }
+
+        return readings.Values;
     }
 
     /// <summary>

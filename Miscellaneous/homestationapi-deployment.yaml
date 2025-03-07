@@ -25,7 +25,7 @@ spec:
               value: "80"
             - name: Database__ConnectionString
               value: "" #example, move to secrets
-          image: 127.0.0.1:5000/homestation2-homestation-api:latest #specify image registry
+          image: 127.0.0.1:5000/homestation2-homestation_api:latest #specify image registry
           name: homestationapi
           ports:
             - containerPort: 1883

@@ -46,31 +46,33 @@ public class GetReadingsQueryHandlerTest
             .ReturnsAsync(new Device()
             {
                 Id = 1,
-                IsKnown = true,
-                AirQuality = new[]
-                {
-                    new Quality
-                    {
-                        DeviceId = 1,
-                        Pm2_5 = 15,
-                        Pm10 = 16,
-                        Pm1_0 = 17,
-                        Reading = new Reading() { Date = now },
-                    }
-                },
-                Climate = new[]
-                {
-                    new Climate
-                    {
-                        DeviceId = 1,
-                        Temperature = 4,
-                        Humidity = 5,
-                        Pressure = 6,
-                        Reading = new Reading() { Date = now },
-                    }
-                }
+                IsKnown = true
             });
-
+        qualityRepository.Setup(x => x.Get(It.IsAny<Func<IQueryable<Quality>, IQueryable<Quality>>>()))
+            .Returns(new[]
+            {
+                new Quality
+                {
+                    DeviceId = 1,
+                    Pm2_5 = 15,
+                    Pm10 = 16,
+                    Pm1_0 = 17,
+                    Reading = new Reading() { Date = now },
+                }
+            }.AsQueryable);
+        climateRepository.Setup(x => x.Get(It.IsAny<Func<IQueryable<Climate>, IQueryable<Climate>>>()))
+            .Returns(new[]
+            {
+                new Climate
+                {
+                    DeviceId = 1,
+                    Temperature = 4,
+                    Humidity = 5,
+                    Pressure = 6,
+                    Reading = new Reading() { Date = now },
+                }
+            }.AsQueryable);
+        
         List<ReadingsWebModel> expected = new List<ReadingsWebModel>()
         {
             new()

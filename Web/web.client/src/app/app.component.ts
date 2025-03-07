@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
+  standalone: false,
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -11,7 +12,7 @@ import { Router } from '@angular/router';
 export class AppComponent implements OnInit{
   links: any[];
 
-  title = 'web.client';
+  title = 'HomeStation';
   activeLink = -1;
 
   constructor(private router: Router) {

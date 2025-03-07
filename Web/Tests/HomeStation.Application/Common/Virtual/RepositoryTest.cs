@@ -40,7 +40,7 @@ public class RepositoryTest
                 Temperature = 1,
                 Humidity = 1,
                 Pressure = 1,
-                Reading = new Reading { Date = dateTime }
+                Reading = new Reading { Date = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero) }
             });
             context.Climate.Add(new Climate
             {
@@ -48,7 +48,7 @@ public class RepositoryTest
                 Temperature = 2,
                 Humidity = 2,
                 Pressure = 2,
-                Reading = new Reading { Date = dateTime }
+                Reading = new Reading { Date = new DateTimeOffset(2000, 1, 2, 1, 1, 1, TimeSpan.Zero) }
             });
 
             await context.SaveChangesAsync();
@@ -69,7 +69,7 @@ public class RepositoryTest
                     Temperature = 1,
                     Humidity = 1,
                     Pressure = 1,
-                    Reading = new Reading { Date = dateTime }
+                    Reading = new Reading { Date = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero) }
                 }
             };
 
@@ -97,7 +97,7 @@ public class RepositoryTest
                     Temperature = 1,
                     Humidity = 1,
                     Pressure = 1,
-                    Reading = new Reading { Date = dateTime },
+                    Reading = new Reading { Date = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero) },
                     Device = new Device()
                     {
                         Id = 1,
@@ -111,7 +111,7 @@ public class RepositoryTest
                     Temperature = 2,
                     Humidity = 2,
                     Pressure = 2,
-                    Reading = new Reading { Date = dateTime },
+                    Reading = new Reading { Date = new DateTimeOffset(2000, 1, 2, 1, 1, 1, TimeSpan.Zero) },
                     Device = new Device()
                     {
                         Id = 1,
@@ -149,7 +149,7 @@ public class RepositoryTest
                     Temperature = 1,
                     Humidity = 1,
                     Pressure = 1,
-                    Reading = new Reading { Date = dateTime },
+                    Reading = new Reading { Date = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero) },
                     Device = new Device()
                     {
                         Id = 1,
@@ -163,7 +163,7 @@ public class RepositoryTest
                     Temperature = 2,
                     Humidity = 2,
                     Pressure = 2,
-                    Reading = new Reading { Date = dateTime },
+                    Reading = new Reading { Date = new DateTimeOffset(2000, 1, 2, 1, 1, 1, TimeSpan.Zero) },
                     Device = new Device()
                     {
                         Id = 1,
@@ -197,7 +197,7 @@ public class RepositoryTest
                     Temperature = 1,
                     Humidity = 1,
                     Pressure = 1,
-                    Reading = new Reading { Date = dateTime },
+                    Reading = new Reading { Date = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero) },
                     Device = new Device()
                     {
                         Id = 1,
@@ -211,7 +211,7 @@ public class RepositoryTest
                     Temperature = 2,
                     Humidity = 2,
                     Pressure = 2,
-                    Reading = new Reading { Date = dateTime },
+                    Reading = new Reading { Date = new DateTimeOffset(2000, 1, 2, 1, 1, 1, TimeSpan.Zero) },
                     Device = new Device()
                     {
                         Id = 1,
@@ -223,7 +223,8 @@ public class RepositoryTest
 
         
         Repository<Climate> climateRepo = new(context);
-        Climate result = await climateRepo.GetLastBy(x => x.Reading.Date.EqualsExact(dateTime),
+        Climate result = climateRepo.GetLastBy(x => x.DeviceId == deviceId,
+            o => o.Reading.Date,
             i => i.Include(d => d.Device));
 
         result.Humidity.Should().Be(expected[1].Humidity);
@@ -237,7 +238,7 @@ public class RepositoryTest
     {
         DbContextOptions<AirDbContext> insertOptions = new DbContextOptionsBuilder<AirDbContext>()
             .UseInMemoryDatabase("InsertDb").Options;
-        
+        DateTimeOffset expectedDate = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero);
         using AirDbContext context = new AirDbContext(insertOptions);
         Repository<Climate> climateRepo = new(context);
         
@@ -246,7 +247,7 @@ public class RepositoryTest
             await climateRepo.InsertAsync(new Climate()
             {
                 DeviceId = 1,
-                Reading = new Reading() { Date = dateTime },
+                Reading = new Reading() { Date = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero) },
                 Humidity = 1,
                 Pressure = 1,
                 Temperature = 1
@@ -263,7 +264,7 @@ public class RepositoryTest
         dbEntity.Humidity.Should().Be(1);
         dbEntity.Temperature.Should().Be(1);
         dbEntity.Pressure.Should().Be(1);
-        dbEntity.Reading.Date.Date.Should().Be(dateTime.Date);
+        dbEntity.Reading.Date.Date.Should().Be(expectedDate.Date);
     }
     
     [Test]
@@ -271,13 +272,14 @@ public class RepositoryTest
     {
         DbContextOptions<AirDbContext> insertOptions = new DbContextOptionsBuilder<AirDbContext>()
             .UseInMemoryDatabase("UpdateDb").Options;
-        
+        DateTimeOffset expectedDate = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero);
+
         using AirDbContext context = new AirDbContext(insertOptions);
         
         context.Climate.Add(new Climate()
         {
             DeviceId = 1,
-            Reading = new Reading() { Date = dateTime },
+            Reading = new Reading() { Date = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero) },
             Humidity = 1,
             Pressure = 1,
             Temperature = 1
@@ -306,7 +308,7 @@ public class RepositoryTest
         dbEntity.Humidity.Should().Be(5);
         dbEntity.Temperature.Should().Be(1);
         dbEntity.Pressure.Should().Be(22);
-        dbEntity.Reading.Date.Date.Should().Be(dateTime.Date);
+        dbEntity.Reading.Date.Date.Should().Be(expectedDate.Date);
     }
     
     [Test]
@@ -320,7 +322,7 @@ public class RepositoryTest
         context.Climate.Add(new Climate()
         {
             DeviceId = 1,
-            Reading = new Reading() { Date = dateTime },
+            Reading = new Reading() { Date = new DateTimeOffset(2000, 1, 1, 1, 1, 1, TimeSpan.Zero) },
             Humidity = 1,
             Pressure = 1,
             Temperature = 1
