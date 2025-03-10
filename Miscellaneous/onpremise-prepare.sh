@@ -13,7 +13,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-while getopts "c:r:o:" opt
+while getopts "c:r:p:" opt
 do
    case "$opt" in
       c ) clone="$OPTARG" ;;

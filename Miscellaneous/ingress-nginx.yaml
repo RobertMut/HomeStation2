@@ -31,4 +31,4 @@ metadata:
   name: tcp-services
   namespace: ingress-nginx
 data:
-  1883: "homestation/homestationapi:1883"
+  1883: "homestation/homestationapi:9883"

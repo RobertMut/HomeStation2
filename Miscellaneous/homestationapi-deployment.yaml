@@ -30,7 +30,7 @@ spec:
           ports:
             - containerPort: 1883
               protocol: TCP
-            - containerPort: 80
+            - containerPort: 9180
               protocol: TCP
       restartPolicy: Always
 ---
@@ -43,7 +43,7 @@ metadata:
 spec:
   ports:
     - name: "1883"
-      port: 1883
+      port: 9883
       protocol: TCP
       targetPort: 1883
     - name: "80"
