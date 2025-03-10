@@ -23,9 +23,9 @@ spec:
           name: homestationweb
           ports:
             - name: "https"
-              containerPort: 443
+              containerPort: 9443
             - name: "http"
-              containerPort: 80
+              containerPort: 9080
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -38,18 +38,36 @@ metadata:
     io.kompose.service: homestationweb
   name: homestationweb
 spec:
-  type: LoadBalancer
   ports:
     - name: "http"
-      port: 80
+      port: 9080
       protocol: TCP
       targetPort: 80
-      nodePort: 30080
+      #nodePort: 30080
     - name: "https"
-      port: 443
+      port: 9443
       protocol: TCP
       targetPort: 443
-      nodePort: 30443
-  #  externalTrafficPolicy: Local
+      #nodePort: 30443
   selector:
     app.kubernetes.io/name: homestationweb
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homestationwebingress
+  namespace: homestation
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /homestation/$1
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /homestation
+            backend:
+              service:
+                name: homestationweb
+                port:
+                  number: 80
+            pathType: Prefix

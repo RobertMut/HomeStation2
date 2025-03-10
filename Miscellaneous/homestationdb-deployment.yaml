@@ -79,17 +79,14 @@ metadata:
     app.kubernetes.io/name: homestationdb
   name: homestationdb
 spec:
-  type: NodePort
   ports:
     - name: "1433port"
       port: 1433
       targetPort: 1433
       protocol: TCP
-      nodePort: 31433
     - name: "1434port"
       port: 1434
       targetPort: 1434
       protocol: UDP
-      nodePort: 31434
   selector:
     app.kubernetes.io/name: homestationdb

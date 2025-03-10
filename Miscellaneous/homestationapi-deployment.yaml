@@ -41,17 +41,14 @@ metadata:
     app.kubernetes.io/name: homestationapi
   name: homestationapi
 spec:
-  type: LoadBalancer
   ports:
     - name: "1883"
       port: 1883
       protocol: TCP
-      nodePort: 31883
       targetPort: 1883
     - name: "80"
-      port: 80
+      port: 9180
       protocol: TCP
-      nodePort: 31080
       targetPort: 80
   selector:
     app.kubernetes.io/name: homestationapi
