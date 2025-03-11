@@ -56,19 +56,7 @@ then
   
   if ! grep -q ":5000" /etc/docker/registry/config.yml;
   then 
-    printf '%s\n' 'version: 0.1'\
-          'log:'\
-            'level: info'\
-            'formatter: json'\
-            'fields:'\
-              'service: registry'\
-          'storage:'\
-            'cache:'\
-              'layerinfo: inmemory'\
-            'filesystem:'\
-              'rootdirectory: /var/lib/registry' \
-          'http:' \
-            'addr: :5000' > /etc/docker/registry/config.yml
+    cp ./docker_registry_config.yml /etc/docker/registry/config.yml
   fi
   
   sudo systemctl restart docker
@@ -91,7 +79,9 @@ cd ./HomeStation2
 if [ "$clone" = true ]; 
 then
   echo "Build image"
-  docker compose -f compose.yaml build 
+  docker rmi --force 127.0.0.1:5000/homestation2-homestation_api:latest
+  docker rmi --force 127.0.0.1:5000/homestation2-homestation_web:latest
+  docker compose -f compose.yaml build
   echo "Push image"
   cd ./Miscellaneous
   docker compose -f ../compose.yaml config --images | grep 'homestation' | awk '{print $1}' | while read image; do docker tag $image 127.0.0.1:5000/$image; done
@@ -114,12 +104,16 @@ then
   curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
   chmod 700 get_helm.sh
   ./get_helm.sh
-  helm repo add nginx-stable https://helm.nginx.com/stable
+  helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
   helm repo update
+  kubectl apply -f ./ingress-nginx.yaml
   kubectl create namespace nginx-ingress
   helm upgrade --install ingress-nginx ingress-nginx \
     --repo https://kubernetes.github.io/ingress-nginx \
-    --namespace ingress-nginx --create-namespace
+    --namespace ingress-nginx --create-namespace \
+    --set controller.extraArgs.tcp-services-configmap=ingress-nginx/tcp-services \
+    --set controller.allowSnippetAnnotations=true
+  kubectl patch deployment ingress-nginx-controller -n ingress-nginx --patch '{ "spec": { "template": { "spec": { "containers": [ { "name": "controller", "ports": [ { "name": "mqtt", "containerPort": 1883, "protocol": "TCP" } ] } ] } } } }'
 fi
 
 sh ./deploy.sh

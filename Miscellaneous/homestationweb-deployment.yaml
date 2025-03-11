@@ -58,13 +58,13 @@ metadata:
   name: homestationwebingress
   namespace: homestation
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /homestation/$1
+    nginx.ingress.kubernetes.io/rewrite-target: /homestation/$2
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
     - http:
         paths:
-          - path: /homestation
+          - path: /homestation(/|$)(.*)
             backend:
               service:
                 name: homestationweb
