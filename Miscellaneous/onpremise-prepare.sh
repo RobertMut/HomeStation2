@@ -79,12 +79,12 @@ cd ./HomeStation2
 if [ "$clone" = true ]; 
 then
   echo "Build image"
-  docker rmi --force 127.0.0.1:5000/homestation2-homestation_api:latest
-  docker rmi --force 127.0.0.1:5000/homestation2-homestation_web:latest
+  #Delete old images
+  docker images --all | grep 'homestation' | awk '{print $3}' | while read image; do docker rmi --force $image; done
   docker compose -f compose.yaml build
   echo "Push image"
   cd ./Miscellaneous
-  docker compose -f ../compose.yaml config --images | grep 'homestation' | awk '{print $1}' | while read image; do docker tag $image 127.0.0.1:5000/$image; done
+  docker images | grep 'homestation' | awk '{print $3,$1}' | while IFS=" " read id name; do docker tag $id 127.0.0.1:5000/$name; done;
   docker compose -f ../compose.yaml config --images | grep 'homestation' | awk '{print $1}' | while read image; do docker push 127.0.0.1:5000/$image; done
 else
   cd ./Miscellaneous

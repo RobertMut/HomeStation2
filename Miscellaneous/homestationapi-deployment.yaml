@@ -5,6 +5,7 @@ metadata:
     kompose.cmd: kompose -f compose.yaml convert
     kompose.version: 1.35.0 (9532ceef3)
   name: homestationapi-deployment
+  namespace: homestation
 spec:
   replicas: 1
   selector:
@@ -40,6 +41,7 @@ metadata:
   labels:
     app.kubernetes.io/name: homestationapi
   name: homestationapi
+  namespace: homestation
 spec:
   ports:
     - name: "1883"
