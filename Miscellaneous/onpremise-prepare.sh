@@ -78,13 +78,14 @@ cd ./HomeStation2
 
 if [ "$clone" = true ]; 
 then
+  newTag="$(md5sum <<< $RANDOM | cut -c3-7)"
   echo "Build image"
   #Delete old images
   docker images --all | grep 'homestation' | awk '{print $3}' | sort -u | while read image; do docker rmi --force $image; done
   docker compose -f compose.yaml build
   echo "Push image"
-  docker images | grep 'homestation' | awk '{print $3,$1}' | while IFS=" " read id name; do docker tag $id 127.0.0.1:5000/$name:latest; done;
-  docker images | grep -E -i '^127.0.0.1:5000*' | grep 'homestation' | awk '{print $1}' | while read image; do docker push $image:latest; done 
+  docker images | grep 'homestation' | awk '{print $3,$1}' | while IFS=" " read id name; do docker tag $id 127.0.0.1:5000/$name:$newTag; done;
+  docker images | grep -E -i '^127.0.0.1:5000*' | grep 'homestation' | awk '{print $1}' | while read image; do docker push $image:$newTag; done 
 fi
 
 cd ./Miscellaneous
