@@ -1,11 +1,9 @@
-var process = require('process');
-
 const PROXY_CONFIG = [
   {
     context: [
       "/api/**",
     ],
-    target: process.env.TARGET_URL || "http://homestationApi/",
+    target: "http://homestationApi:9180/",
     secure: false,
   }
 ]

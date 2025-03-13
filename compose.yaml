@@ -28,7 +28,7 @@ services:
             dockerfile: Dockerfile
         ports:
             - "1883:1883"
-            - "9081:80"
+            - "9180:80"
         networks:
             - homestation
         depends_on:
@@ -42,8 +42,6 @@ services:
             context: ./Web/web.client
             args:
                 - HREF=/homestation/
-        environment:
-            - TARGET_URL=http://homestationApi/
         ports:
             - "9080:80"
             - "9443:443"
