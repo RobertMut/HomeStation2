@@ -22,6 +22,9 @@ spec:
       containers:
         - image: 127.0.0.1:5000/homestation2-homestation_web:latest #specify registry
           name: homestationweb
+          env:
+            - name: TARGET_URL
+              value: "http://homestationApi/homestation/"
           ports:
             - name: "https"
               containerPort: 9443
@@ -61,11 +64,12 @@ metadata:
   namespace: homestation
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /homestation/
 spec:
   rules:
     - http:
         paths:
-          - path: /homestation
+          - path: /homestation/
             backend:
               service:
                 name: homestationweb

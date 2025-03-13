@@ -6,9 +6,7 @@ WORKDIR "/app"
 RUN npm install -g @angular/cli
 
 FROM base AS publish
-ARG TARGET_URL
 ARG HREF
-ENV TARGET_URL=$TARGET_URL
 COPY . .
 WORKDIR "/app/web.client"
 ARG BUILD_CONFIGURATION=Release

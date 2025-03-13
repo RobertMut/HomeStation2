@@ -54,3 +54,24 @@ spec:
       targetPort: 80
   selector:
     app.kubernetes.io/name: homestationapi
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homestationapiingress
+  namespace: homestation
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /api/$1
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /homestation/api/(.*)
+            backend:
+              service:
+                name: homestationapi
+                port:
+                  number: 9180
+            pathType: ImplementationSpecific
+  ingressClassName: nginx
