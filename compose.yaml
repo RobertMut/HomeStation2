@@ -42,6 +42,7 @@ services:
             context: ./Web/web.client
             args:
                 - TARGET_URL=http://homestationApi/
+                - HREF=/homestation/
         ports:
             - "9080:80"
             - "9443:443"
