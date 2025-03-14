@@ -26,7 +26,7 @@ TaskHandle_t mqtt_handle;
 TaskHandle_t pms_handle;
 
 HD44780* lcd_handle;
-
+data_t* display_data;
 SemaphoreHandle_t semaphore = xSemaphoreCreateBinary();
 
 template<typename ... Args>
@@ -138,30 +138,17 @@ int8_t IRAM_ATTR user_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len
     return iError;
 }
 
-static void print_data(data_t* data){
-    if(!data){
-        ESP_LOGE("LCD", "LCD data NULL!");
-        
-        return;
-    }
-
-    if (data->temperature == NULL ||
-        data->pm2_5 == NULL || data-> pm2_5 < 0) {
-        ESP_LOGE("LCD", "Invalid data");
-        
-        return;
-    }
-
+static void print_data() {
     ESP_LOGI("LCD", "LCD Begin");
     lcd_handle->clear();
     lcd_handle->moveCursor(0, 0);
-    lcd_handle->write(string_format("TMP: %.1f, HUM: %.1f", data->temperature, data->humidity).c_str());
+    lcd_handle->write(string_format("TMP: %.1f, HUM: %.1f", display_data->temperature, display_data->humidity).c_str());
     lcd_handle->moveCursor(0, 1);
-    lcd_handle->write(string_format("PRESS: %.1f", data->pressure).c_str());
+    lcd_handle->write(string_format("PRESS: %.1f", display_data->pressure).c_str());
     lcd_handle->moveCursor(0, 2);
-    lcd_handle->write(string_format("PM2.5: %hhu, PM10: %hhu", data->pm2_5, data->pm10).c_str());
+    lcd_handle->write(string_format("PM2.5: %hhu, PM10: %hhu", display_data->pm2_5, display_data->pm10).c_str());
     lcd_handle->moveCursor(0, 3);
-    lcd_handle->write(string_format("PM1: %hhu", data->pm1_0).c_str());
+    lcd_handle->write(string_format("PM1: %hhu", display_data->pm1_0).c_str());
     ESP_LOGI("LCD", "LCD Set");
 }
 
@@ -175,7 +162,13 @@ static void pms_task(void *arg){
             data->pm1_0 = pms_data->pm1_0;
             data->pm2_5 = pms_data->pm2_5;
             data->pm10 = pms_data->pm10;
+            
+            display_data->pm1_0 = data->pm1_0;
+            display_data->pm2_5 = data->pm2_5;
+            display_data->pm10 = data->pm10;
+
             intertask::set_data(data);
+            print_data();
         }
 
         vTaskDelay(pdMS_TO_TICKS(20000));
@@ -186,10 +179,10 @@ static void mqtt_task(void *arg){
     esp_mqtt_client_config_t* mqtt_cfg = new esp_mqtt_client_config_t();
     mqtt_cfg->broker = {
         .address = {
-            .uri = "mqtt://192.168.1.217:1884",
+            .uri = "mqtt://192.168.1.217:9883",
             .hostname = "192.168.1.217",
             .path = "/mqtt",
-            .port = 1884
+            .port = 9883
         }
     };
     mqtt_cfg->credentials = {};
@@ -236,6 +229,8 @@ extern "C" void app_main(void) {
     config.write_cb = NULL;
 
     wifi_manager* wifi = new wifi_manager("", "");
+    display_data = new data_t();
+    
     Bosch* bosch = new Bosch(GPIO_NUM_21, GPIO_NUM_22);
     lcd_handle = new HD44780();
 
@@ -251,10 +246,19 @@ extern "C" void app_main(void) {
         bme280_data* sensor_data = bosch->getDataForcedMode();
 
         data->temperature = sensor_data->temperature;
+        double correctedTemperature = sensor_data->temperature - 1.1; //bme280 heating problem
+        
+        data->temperature = correctedTemperature;
         data->humidity = sensor_data->humidity;
         data->pressure = sensor_data->pressure;
 
         print_data(data);
+        
+        display_data->temperature = correctedTemperature;
+        display_data->humidity = sensor_data->humidity;
+        display_data->pressure = sensor_data->pressure;
+
+        print_data();
         vTaskDelay(pdMS_TO_TICKS(60000));
     }
 }
