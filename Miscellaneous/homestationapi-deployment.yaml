@@ -27,11 +27,9 @@ spec:
             - name: Database__ConnectionString
               value: "" #example, move to secrets
           image: 127.0.0.1:5000/homestation2-homestation_api:latest #specify image registry
-          image: 127.0.0.1:5000/homestation2-homestation_api  #specify image registry
-          imagePullPolicy: Always
           name: homestationapi
           ports:
-            - containerPort: 1883
+            - containerPort: 9883
               protocol: TCP
             - containerPort: 9180
               protocol: TCP
@@ -46,7 +44,7 @@ metadata:
   namespace: homestation
 spec:
   ports:
-    - name: "1883"
+    - name: "9883"
       port: 9883
       protocol: TCP
       targetPort: 1883
@@ -69,7 +67,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /homestation/api/(.*)
+          - path: /api/(.*)
             backend:
               service:
                 name: homestationapi
