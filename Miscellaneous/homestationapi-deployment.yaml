@@ -5,6 +5,7 @@ metadata:
     kompose.cmd: kompose -f compose.yaml convert
     kompose.version: 1.35.0 (9532ceef3)
   name: homestationapi-deployment
+  namespace: homestation
 spec:
   replicas: 1
   selector:
@@ -26,11 +27,13 @@ spec:
             - name: Database__ConnectionString
               value: "" #example, move to secrets
           image: 127.0.0.1:5000/homestation2-homestation_api:latest #specify image registry
+          image: 127.0.0.1:5000/homestation2-homestation_api  #specify image registry
+          imagePullPolicy: Always
           name: homestationapi
           ports:
             - containerPort: 1883
               protocol: TCP
-            - containerPort: 80
+            - containerPort: 9180
               protocol: TCP
       restartPolicy: Always
 ---
@@ -40,18 +43,37 @@ metadata:
   labels:
     app.kubernetes.io/name: homestationapi
   name: homestationapi
+  namespace: homestation
 spec:
-  type: LoadBalancer
   ports:
     - name: "1883"
-      port: 1883
+      port: 9883
       protocol: TCP
-      nodePort: 31883
       targetPort: 1883
     - name: "80"
-      port: 80
+      port: 9180
       protocol: TCP
-      nodePort: 31080
       targetPort: 80
   selector:
     app.kubernetes.io/name: homestationapi
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homestationapiingress
+  namespace: homestation
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /api/$1
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /homestation/api/(.*)
+            backend:
+              service:
+                name: homestationapi
+                port:
+                  number: 9180
+            pathType: ImplementationSpecific
+  ingressClassName: nginx

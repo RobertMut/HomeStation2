@@ -6,14 +6,16 @@ WORKDIR "/app"
 RUN npm install -g @angular/cli
 
 FROM base AS publish
-ARG TARGET_URL
-ENV TARGET_URL=$TARGET_URL
+ARG HREF
 COPY . .
 WORKDIR "/app/web.client"
 ARG BUILD_CONFIGURATION=Release
 RUN npm install
-RUN ng build --configuration production --optimization
+RUN ng build --configuration production --optimization --base-href $HREF
 
 FROM nginx:stable-alpine AS final
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=publish /app/dist/web.client/browser /usr/share/nginx/html
+ARG HREF
+RUN rm -rf /etc/nginx/nginx.conf
+COPY ./nginx.conf /etc/nginx/nginx.conf
+RUN sed "s|%ARGLOCATION%|$HREF|g" /etc/nginx/nginx.conf
+COPY --from=publish /app/dist/web.client/browser /usr/share/nginx/html$HREF
