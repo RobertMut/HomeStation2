@@ -59,13 +59,16 @@ then
     cp ./docker_registry_config.yml /etc/docker/registry/config.yml
   fi
   
-  sudo systemctl restart docker
+sudo systemctl stop docker
+systemctl daemon-reload
+sudo systemctl start docker
+  
 fi
 if [ "$clone" = true ]; 
 then
   echo "Cloning..."
   rm -rf ./HomeStation2
-  git clone -b dev/fixes https://github.com/RobertMut/HomeStation2.git
+  git clone https://github.com/RobertMut/HomeStation2.git
 fi
 
 if [ "$createRegistry" = true ];
@@ -78,14 +81,16 @@ cd ./HomeStation2
 
 if [ "$clone" = true ]; 
 then
-  newTag="$(md5sum <<< $RANDOM | cut -c3-7)"
   echo "Build image"
-  #Delete old images
+  #Delete old local images
   docker images --all | grep 'homestation' | awk '{print $3}' | sort -u | while read image; do docker rmi --force $image; done
+  #Build new
   docker compose -f compose.yaml build
   echo "Push image"
-  docker images | grep 'homestation' | awk '{print $3,$1}' | while IFS=" " read id name; do docker tag $id 127.0.0.1:5000/$name:$newTag; done;
-  docker images | grep -E -i '^127.0.0.1:5000*' | grep 'homestation' | awk '{print $1}' | while read image; do docker push $image:$newTag; done 
+  #Tagging
+  docker images | grep 'homestation' | awk '{print $3,$1}' | while IFS=" " read id name; do docker tag $id 127.0.0.1:5000/$name:latest; done;
+  #Push
+  docker images | grep -E -i '^127.0.0.1:5000*' | grep 'homestation' | awk '{print $1}' | while read image; do docker push $image:latest; done 
 fi
 
 cd ./Miscellaneous
@@ -113,7 +118,8 @@ then
     --namespace ingress-nginx --create-namespace \
     --set controller.extraArgs.tcp-services-configmap=ingress-nginx/tcp-services \
     --set controller.allowSnippetAnnotations=true
-  kubectl patch deployment ingress-nginx-controller -n ingress-nginx --patch '{ "spec": { "template": { "spec": { "containers": [ { "name": "controller", "ports": [ { "name": "mqtt", "containerPort": 1883, "protocol": "TCP" } ] } ] } } } }'
+  kubectl patch deployment ingress-nginx-controller -n ingress-nginx --patch '{ "spec": { "template": { "spec": { "containers": [ { "name": "controller", "ports": [ { "name": "mqtt", "containerPort": 9883, "protocol": "TCP" } ] } ] } } } }'
+  kubectl patch service ingress-nginx-controller -n ingress-nginx --patch '{ "spec": { "ports": [ { "appProtocol": "mqtt", "name": "mqtt", "nodePort": 30843, "port": 9883, "protocol": "TCP", "targetPort": "mqtt" } ] } }'
 fi
 
 sh ./deploy.sh
