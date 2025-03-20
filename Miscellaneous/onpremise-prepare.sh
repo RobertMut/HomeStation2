@@ -41,6 +41,24 @@ then
   sudo curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable=traefik --disable=metrics-server" sh -
 fi
 
+if ! command -v docker 2>&1 >/dev/null
+then
+  echo "Docker install.."
+  sudo apt-get update
+  sudo apt-get install ca-certificates curl
+  sudo install -m 0755 -d /etc/apt/keyrings
+  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  sudo chmod a+r /etc/apt/keyrings/docker.asc
+  
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  sudo apt-get update
+  
+  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+fi
+
 if [ "$createRegistry" = true ];
 then
   mkdir ./data
@@ -122,4 +140,5 @@ then
   kubectl patch service ingress-nginx-controller -n ingress-nginx --patch '{ "spec": { "ports": [ { "appProtocol": "mqtt", "name": "mqtt", "nodePort": 30843, "port": 9883, "protocol": "TCP", "targetPort": "mqtt" } ] } }'
 fi
 
+kubectl create namespace homestation
 sh ./deploy.sh

@@ -7,3 +7,4 @@
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
     volumes:
       - ./data:/data
+    restart: on-failure
