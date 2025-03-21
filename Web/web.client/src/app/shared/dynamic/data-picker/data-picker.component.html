@@ -1,48 +1,52 @@
 <form (ngSubmit)="publishValues()" [formGroup]="dataFormGroup">
-    <mat-form-field>
-        <mat-label>Device</mat-label>
-        <mat-select [(ngModel)]="request.device" [ngModelOptions]="{standalone: true}" formControlName="device">
-            <mat-option *ngFor="let device of devices | async" [item]="device" [value]="device.id">{{ device.name }}
-            </mat-option>
-        </mat-select>
-
-        @if (dataFormGroup.controls['device'].hasError('required')) {
-            <mat-error>Device is required</mat-error>
-        }
-    </mat-form-field>
-
-    <mat-form-field>
-        <mat-label>Enter a date range</mat-label>
-        <mat-date-range-input [rangePicker]="picker">
-            <input matStartDate [(ngModel)]="request.startDate" formControlName="start" placeholder="Start date">
-            <input matEndDate [(ngModel)]="request.endDate" formControlName="end" placeholder="End date">
-        </mat-date-range-input>
-        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-date-range-picker #picker></mat-date-range-picker>
-
-        @if (dataFormGroup.controls['start'].hasError('required')) {
-            <mat-error>Invalid start date</mat-error>
-        }
-        @if (dataFormGroup.controls['end'].hasError('required')) {
-            <mat-error>Invalid end date</mat-error>
-        }
-    </mat-form-field>
-
-    <mat-form-field>
-        <mat-label>Details</mat-label>
-        <mat-select formControlName="selectedDetail"
-                    [(ngModel)]="request.selectedDetail"
-                    [ngModelOptions]="{standalone: true}">
-            @for (detail of details; track detail) {
-                <mat-option [value]="detail.value">{{ detail.value }}</mat-option>
-            }
-        </mat-select>
-
-        @if (dataFormGroup.controls['selectedDetail'].hasError('required')) {
-            <mat-error>Details is required</mat-error>
-        }
-    </mat-form-field>
+    <div id="fields">
+        <mat-form-field>
+            <mat-label>Device</mat-label>
+            <mat-select [(ngModel)]="request.device" [ngModelOptions]="{standalone: true}" formControlName="device" testid="select-device">
+                <mat-option *ngFor="let device of devices | async" [item]="device" [value]="device.id" testid="select-option">{{ device.name }}
+                </mat-option>
+            </mat-select>
     
-    <button mat-flat-button [disabled]="!dataFormGroup.valid" type="submit">Get</button>
+            @if (dataFormGroup.controls['device'].hasError('required')) {
+                <mat-error>Device is required</mat-error>
+            }
+        </mat-form-field>
+    
+        <mat-form-field>
+            <mat-label>Enter a date range</mat-label>
+            <mat-date-range-input [rangePicker]="picker">
+                <input matStartDate [(ngModel)]="request.startDate" formControlName="start" placeholder="Start date">
+                <input matEndDate [(ngModel)]="request.endDate" formControlName="end" placeholder="End date">
+            </mat-date-range-input>
+            <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-date-range-picker #picker/>
+            @if (dataFormGroup.controls['start'].hasError('required')) {
+                <mat-error>Invalid start date</mat-error>
+            }
+            @if (dataFormGroup.controls['end'].hasError('required')) {
+                <mat-error>Invalid end date</mat-error>
+            }
+        </mat-form-field>
+    
+        <mat-form-field>
+            <mat-label>Details</mat-label>
+            <mat-select formControlName="selectedDetail"
+                        [(ngModel)]="request.selectedDetail"
+                        [ngModelOptions]="{standalone: true}">
+                @for (detail of details; track detail) {
+                    <mat-option [value]="detail.value">{{ detail.value }}</mat-option>
+                }
+            </mat-select>
+    
+            @if (dataFormGroup.controls['selectedDetail'].hasError('required')) {
+                <mat-error>Details is required</mat-error>
+            }
+        </mat-form-field>
+        
+        <button mat-flat-button [disabled]="!dataFormGroup.valid" type="submit" testid="get-data-btn">Get</button>
+    </div>
+    <div id="hints">
+        <mat-hint>Selecting range greater than two days or detailed view can impact performance.</mat-hint>
+    </div>
 </form>

@@ -3,6 +3,7 @@ import {TestBed} from '@angular/core/testing';
 import {ReadingsService} from './readings.service';
 import {ReadingsData} from "../../tests/data";
 import {DetailLevel} from "../detail-level";
+import { GraphType } from '../graph-type';
 
 describe('ReadingsService', () => {
   let service: ReadingsService;
@@ -27,11 +28,11 @@ describe('ReadingsService', () => {
 
   it('should fetch readings', () => {
 
-    service.getReadings(1, startDate, endDate, DetailLevel.Detailed).subscribe(readings => {
+    service.getReadings(GraphType.AirQuality, 1, startDate, endDate, DetailLevel.Detailed).subscribe(readings => {
       expect(readings).toEqual(ReadingsData);
     });
 
-    const req = httpMock.expectOne(api + `1/${startDate.toISOString()}/${endDate.toISOString()}/${DetailLevel.Detailed}`);
+    const req = httpMock.expectOne(api + `${GraphType.AirQuality}/1/${startDate.toISOString()}/${endDate.toISOString()}/${DetailLevel.Detailed}`);
     expect(req.request.method).toBe('GET');
     req.flush(ReadingsData);
   });
@@ -47,24 +48,24 @@ describe('ReadingsService', () => {
   });
 
   it('should handle empty readings list', () => {
-    service.getReadings(1, startDate, endDate, DetailLevel.Normal).subscribe(readings => {
+    service.getReadings(GraphType.Pressure, 1, startDate, endDate, DetailLevel.Normal).subscribe(readings => {
       expect(readings.length).toBe(0);
     });
 
-    const req = httpMock.expectOne(api + `1/${startDate.toISOString()}/${endDate.toISOString()}/${DetailLevel.Normal}`);
+    const req = httpMock.expectOne(api + `${GraphType.Pressure}/1/${startDate.toISOString()}/${endDate.toISOString()}/${DetailLevel.Normal}`);
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
 
   it('should handle error on fetching readings', () => {
-    service.getReadings(1, startDate, endDate, DetailLevel.Less).subscribe({
+    service.getReadings(GraphType.Temperature, 1, startDate, endDate, DetailLevel.Less).subscribe({
           next:() => fail('should have failed with the 500 error'),
           error: (error) => {
             expect(error.status).toBe(500);
           }
     });
     
-    const req = httpMock.expectOne(api + `1/${startDate.toISOString()}/${endDate.toISOString()}/Less`);
+    const req = httpMock.expectOne(api + `${GraphType.Temperature}/1/${startDate.toISOString()}/${endDate.toISOString()}/Less`);
     req.flush('Error', { status: 500, statusText: 'Server Error' });
   });
 });

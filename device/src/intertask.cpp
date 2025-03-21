@@ -23,5 +23,6 @@ void intertask::set_data(data_t *data)
 
 void intertask::clear_data()
 {
-    current_data = NULL;
+    delete current_data;
+    current_data = nullptr;
 }

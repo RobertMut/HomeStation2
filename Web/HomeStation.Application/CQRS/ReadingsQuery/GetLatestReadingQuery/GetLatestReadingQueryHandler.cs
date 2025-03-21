@@ -27,8 +27,8 @@ public class GetLatestReadingQueryHandler : IQueryHandler<GetLatestReadingQuery,
     /// <exception cref="Exception">If there is no readings</exception>
     public async Task<ReadingsWebModel> Handle(GetLatestReadingQuery query, CancellationToken cancellationToken)
     {
-        Climate? climate = await _unitOfWork.ClimateRepository.GetLastBy(x => x.DeviceId == query.DeviceId, cancellationToken: cancellationToken);
-        Quality? quality = await _unitOfWork.QualityRepository.GetLastBy(x => x.DeviceId == query.DeviceId, cancellationToken: cancellationToken);
+        Climate? climate = _unitOfWork.ClimateRepository.GetLastBy(x => x.DeviceId == query.DeviceId, o => o.Reading.Date);
+        Quality? quality = _unitOfWork.QualityRepository.GetLastBy(x => x.DeviceId == query.DeviceId, o => o.Reading.Date);
         
         if (climate == null || quality == null)
         {

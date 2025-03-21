@@ -2,7 +2,7 @@
     <ng-container *ngIf="(result == undefined || result.length == 0); then noDevices; else devicesPresent"/>
     <ng-template #noDevices>
         <div class="exception">
-            <mat-icon>sync_problem</mat-icon>
+            <mat-icon class="pad-bott7_5">sync_problem</mat-icon>
             <p>No devices to select!</p>
             <p>Set up the device and wait for data to be reported.</p>
         </div>
@@ -19,37 +19,38 @@
 
 <ng-container *ngIf="(loaded && reading != undefined); then readingTemplate; else notification" />
 <ng-template #readingTemplate>
-    <p testid="read-date">Reading date: {{reading!.readDate}}</p>
+    <h3><strong>{{this.device?.name}}</strong></h3>
+    <p testid="read-date">Reading date: {{reading?.readDate ?? 'N/A'}}</p>
     <div class="cards">
         <mat-card>
-            <mat-card-header><mat-icon>device_thermostat</mat-icon></mat-card-header>
-            <mat-card-content testid="temperature">{{reading!.temperature}}</mat-card-content>
+            <mat-card-header><mat-icon>device_thermostat</mat-icon>(°C)</mat-card-header>
+            <mat-card-content testid="temperature">{{reading?.temperature ?? 'N/A'}}</mat-card-content>
         </mat-card>
         <mat-card>
-            <mat-card-header><mat-icon>water_drop</mat-icon></mat-card-header>
-            <mat-card-content testid="humidity">{{reading!.humidity}}</mat-card-content>
+            <mat-card-header><mat-icon>water_drop</mat-icon>(%)</mat-card-header>
+            <mat-card-content testid="humidity">{{reading?.humidity ?? 'N/A'}}</mat-card-content>
         </mat-card>
         <mat-card>
             <mat-card-header><mat-icon>airware</mat-icon> PM 2.5</mat-card-header>
-            <mat-card-content testid="pm2.5">{{reading!.pm2_5}}</mat-card-content>
+            <mat-card-content testid="pm2.5">{{reading?.pm2_5 ?? 'N/A'}}</mat-card-content>
         </mat-card>
         <mat-card>
             <mat-card-header><mat-icon>airware</mat-icon> PM 10</mat-card-header>
-            <mat-card-content testid="pm10">{{reading!.pm10}}</mat-card-content>
+            <mat-card-content testid="pm10">{{reading?.pm10 ?? 'N/A'}}</mat-card-content>
         </mat-card>
         <mat-card>
-            <mat-card-header><mat-icon>public</mat-icon> Pressure</mat-card-header>
-            <mat-card-content testid="pressure">{{reading!.pressure != undefined ? reading!.pressure / 100 : reading!.pressure}}</mat-card-content>
+            <mat-card-header><mat-icon>public</mat-icon> Pressure (hPa)</mat-card-header>
+            <mat-card-content testid="pressure">{{reading?.pressure != undefined ? (reading!.pressure / 100).toFixed(2) : 'N/A'}}</mat-card-content>
         </mat-card>
         <mat-card>
             <mat-card-header><mat-icon>airware</mat-icon> PM 1.0</mat-card-header>
-            <mat-card-content testid="pm1.0">{{reading!.pm1_0}}</mat-card-content>
+            <mat-card-content testid="pm1.0">{{reading?.pm1_0 ?? 'N/A'}}</mat-card-content>
         </mat-card>
     </div>
 </ng-template>
 <ng-template #notification class="exception">
     <div class="exception">
-        <mat-icon>warning_amber</mat-icon>
+        <mat-icon class="pad-bott7_5">warning_amber</mat-icon>
         <p>No current data to display!</p>
         <p>Ensure device is selected and reporting data.</p>
     </div>

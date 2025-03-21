@@ -44,25 +44,28 @@ pm_data_t* PMS3003::pms_uart_read()
     int length = 0;
     int retry = 0;
     pm_data_t* decoded_data;
-    
+    bool fail = true;
     do {
         length = uart_read_bytes(this->_config->port, data, 32, 100 / portTICK_PERIOD_MS);
 
         if(length >= 24 && data[0]==0x42 && data[1]==0x4d){
             ESP_LOGI(TAG, "UART READ %d", length);
                 decoded_data = decode_data(data, this->_config->indoor ? 4 : 10);
-                decoded_data->fail = false;
+                fail = false;
+                decoded_data->fail = fail;
+                
                 return decoded_data;
-        } else {
-            ESP_LOGE(TAG, "Invalid frame %d", length);
-            decoded_data = new pm_data_t();
-            decoded_data->fail = true;
-        }
+        } 
 
-        vTaskDelay(pdMS_TO_TICKS(500));
+        ESP_LOGE(TAG, "Invalid frame %d", length);
+
+        vTaskDelay(pdMS_TO_TICKS(250));
 
         retry++;
-    } while(decoded_data->fail || retry < 50);
+    } while(fail || retry < 50);
+
+    decoded_data = new pm_data_t();
+    decoded_data->fail = fail;
 
     return decoded_data;
 }

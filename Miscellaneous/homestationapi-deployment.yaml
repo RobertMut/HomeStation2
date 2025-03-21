@@ -1,0 +1,80 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose -f compose.yaml convert
+    kompose.version: 1.35.0 (9532ceef3)
+  name: homestationapi-deployment
+  namespace: homestation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: homestationapi
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: homestationapi
+    spec:
+      containers:
+        - env:
+            - name: MQTT__Port
+              value: "1883"
+            - name: MQTT__Address
+              value: "0.0.0.0"
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "80"
+            - name: Database__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  key: ConnectionString
+                  name: homestation-secrets
+          image: 127.0.0.1:5000/homestation2-homestation_api:latest #specify image registry
+          name: homestationapi
+          ports:
+            - containerPort: 9883
+              protocol: TCP
+            - containerPort: 9180
+              protocol: TCP
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: homestationapi
+  name: homestationapi
+  namespace: homestation
+spec:
+  ports:
+    - name: "9883"
+      port: 9883
+      protocol: TCP
+      targetPort: 1883
+    - name: "80"
+      port: 9180
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app.kubernetes.io/name: homestationapi
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homestationapiingress
+  namespace: homestation
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /api/$1
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api/(.*)
+            backend:
+              service:
+                name: homestationapi
+                port:
+                  number: 9180
+            pathType: ImplementationSpecific
+  ingressClassName: nginx

@@ -38,7 +38,7 @@
 
 void Bosch::delay_us(uint32_t period, void *intf_ptr)
 {
-    vTaskDelay(pdMS_TO_TICKS(period));
+    ets_delay_us(period * 1000);
 }
 
 Bosch::Bosch(const gpio_num_t sda, const gpio_num_t scl)
@@ -62,7 +62,18 @@ void Bosch::init()
         ESP_LOGE(BME, "Failed to init I2C, retrying..");
     };
     CHECKRSLT(bme280_init(this->_bme), "init");
-    set_mode(BME280_POWERMODE_NORMAL);
+    
+    bme280_settings* settings = new bme280_settings();
+    settings->osr_h = BME280_OVERSAMPLING_1X;
+    settings->osr_p = BME280_OVERSAMPLING_1X;
+    settings->osr_t = BME280_OVERSAMPLING_1X;
+    settings->filter = BME280_FILTER_COEFF_OFF;
+    this->_period = new uint32_t(1000);
+    this->_settings = settings;
+    CHECKRSLT(
+        bme280_set_sensor_settings(BME280_SEL_ALL_SETTINGS, this->_settings, this->_bme), 
+        "set sensor settings"
+    );
 }
 
 void Bosch::reset()
@@ -72,41 +83,92 @@ void Bosch::reset()
 
 void Bosch::set_mode(uint8_t mode)
 {
-    bme280_settings* settings = new bme280_settings();
-    settings->osr_h = BME280_OVERSAMPLING_1X;
-    settings->osr_p = BME280_OVERSAMPLING_16X;
-    settings->osr_t = BME280_OVERSAMPLING_2X;
-    settings->filter = BME280_FILTER_COEFF_16;
-    settings->standby_time = BME280_STANDBY_TIME_62_5_MS;
-    this->_settings = settings;
+    int8_t result = BME280_E_NULL_PTR;
+    while(result != BME280_OK){
+        result = bme280_set_sensor_mode(mode, this->_bme);
+        CHECKRSLT(result, "Trying to change power mode..");
+        Bosch::delay_us(1000, NULL);
+    }
 
-    CHECKRSLT(
-        bme280_set_sensor_settings(BME280_SEL_ALL_SETTINGS, this-> _settings, this->_bme), 
-        "set sensor settings"
-    );
-    CHECKRSLT(
-        bme280_set_sensor_mode(mode, this->_bme), "set sensor mode"
-    );
+    CHECKRSLT(result, "Changed power mode!");
 }
 
-IRAM_ATTR bme280_data* Bosch::getData()
+/// @brief 
+/// Gets bme280 data by Forced power mode 
+/// @return bme280_data pointer
+IRAM_ATTR bme280_data* Bosch::getDataForcedMode()
 {
-    uint8_t i = 0;
+    Bosch::set_mode(BME280_POWERMODE_FORCED);
     this->_data = new bme280_data();
-    CHECKRSLT(bme280_cal_meas_delay(this->_period, this->_settings), "calibrate measure delay");
-    uint32_t period = reinterpret_cast<uint32_t>(this->_period);
-    bool done = false;
+    int8_t rslt = BME280_E_NULL_PTR;
+    uint8_t idx = 0;
+    
+    while (rslt != BME280_OK && idx < 20) {
+        ESP_LOGI(BME, "Measuring...");
+        rslt = bme280_get_sensor_data(BME280_ALL, this->_data, this->_bme);
+    
+        if (rslt != BME280_OK) {
+            ESP_LOGE(BME, "Failed to get sensor data");
+            Bosch::delay_us(1000, NULL);
+        }
+    
+        idx++;
+    }
 
-    do {
-        set_mode(BME280_POWERMODE_FORCED);
-        vTaskDelay(pdMS_TO_TICKS(period));
-        
-        uint8_t result = bme280_get_sensor_data(BME280_ALL, this->_data, this->_bme);
-        
-        CHECKRSLT(result, "get sensor data");
-        done = result == 0;
-        i++;
-    } while (!done && i < 50);
+    ESP_LOGI(BME, "Measure done.");
+    Bosch::set_mode(BME280_POWERMODE_SLEEP);
+
+    return this->_data;
+}
+
+/// @brief 
+/// Gets bme280 data by normal power mode 
+/// @attention Causes device heating
+/// @return bme280_data pointer
+IRAM_ATTR bme280_data* Bosch::getDataNormalMode()
+{
+    Bosch::set_mode(BME280_POWERMODE_NORMAL);
+    this->_data = new bme280_data();
+    int8_t measureDelayRslt = BME280_E_NULL_PTR;
+    while(measureDelayRslt != BME280_OK){
+        measureDelayRslt = bme280_cal_meas_delay(this->_period, this->_settings);
+        CHECKRSLT(measureDelayRslt, "Calibrate measure delay")
+    }
+
+    int8_t rslt = BME280_E_NULL_PTR;
+    uint8_t idx = 0;
+    uint8_t status_reg;
+    while (idx < 2) {
+        rslt = bme280_get_regs(BME280_REG_STATUS, &status_reg, 1, this->_bme);
+
+        if (rslt != BME280_OK) {
+            ESP_LOGE(BME, "Failed to get regs");
+
+            continue;
+        }
+
+        if(status_reg & BME280_STATUS_MEAS_DONE)
+        {
+            this->_bme->delay_us(*this->_period, this->_bme);
+            rslt = bme280_get_sensor_data(BME280_ALL, this->_data, this->_bme);
+
+            if (rslt != BME280_OK) {
+                ESP_LOGE(BME, "Failed to get sensor data");
+
+                continue;
+            }
+
+            ESP_LOGI(BME, "Part of measurement completed.");
+
+            idx++;
+        }
+        Bosch::delay_us(1000, NULL);
+
+        ESP_LOGI(BME, "Sensor, next iteration");
+    }
+
+    ESP_LOGI(BME, "Measure done.");
+    Bosch::set_mode(BME280_POWERMODE_SLEEP);
 
     return this->_data;
 }

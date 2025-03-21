@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using HomeStation.Application.Common.Interfaces;
+using HomeStation.Domain.Common.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 
@@ -45,14 +46,14 @@ public class Repository<TEntity> where TEntity : class
     /// <returns>IEnumerable of entities</returns>
     public virtual IQueryable<TEntity> Get(Func<IQueryable<TEntity>, IQueryable<TEntity>> func)
     {
-        var query = _dbSet.AsQueryable();
+        var query = _dbSet.AsNoTracking().AsQueryable();
 
         if (func != null)
         {
             query = func(query);
         }
 
-        return query.AsNoTracking();
+        return query;
     }
     
     /// <summary>
@@ -62,7 +63,7 @@ public class Repository<TEntity> where TEntity : class
     /// <returns>IEnumerable of entities</returns>
     public virtual IQueryable<TEntity> GetAll(params Expression<Func<TEntity, object>>[] includeProperties)
     {
-        var query = _dbSet.AsQueryable();
+        var query = _dbSet.AsNoTracking().AsQueryable();
 
         if (includeProperties != null)
         {
@@ -85,7 +86,7 @@ public class Repository<TEntity> where TEntity : class
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include = null,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<TEntity> query = _dbSet.AsQueryable();
+        IQueryable<TEntity> query = _dbSet.AsNoTracking().AsQueryable();
 
         if (include != null)
         {
@@ -98,21 +99,22 @@ public class Repository<TEntity> where TEntity : class
     /// <summary>
     /// Gets last single entity object by filter
     /// </summary>
-    /// <param name="filter">Expression filter</param>
-    /// <param name="cancellationToken">CancellationToken</param>
+    /// <param name="whereBy">Expression filter</param>
+    /// <param name="orderBy">Expression order</param>
+    /// <param name="include">Include function for related entities</param>
     /// <returns>Entity</returns>
-    public virtual async Task<TEntity?> GetLastBy(Func<TEntity?, bool> func,
-        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include = null,
-        CancellationToken cancellationToken = default)
+    public virtual TEntity? GetLastBy(Expression<Func<TEntity, bool>> whereBy,
+        Expression<Func<TEntity?, object>> orderBy,
+        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include = null)
     {
-        IQueryable<TEntity> query = _dbSet.AsQueryable();
+        IQueryable<TEntity> query = _dbSet.AsNoTracking();
 
         if (include != null)
         {
             query = include(query);
         }
-        
-        return query.LastOrDefault(func);
+
+        return query.Where(whereBy).OrderByDescending(orderBy).FirstOrDefault();
     }
     
     /// <summary>

@@ -1,4 +1,3 @@
-#include "hd44780.h"
 #include "esp32/rom/ets_sys.h"
 #include "bme280.h"
 #include "driver/i2c.h"
@@ -25,8 +24,6 @@
 TaskHandle_t mqtt_handle;
 TaskHandle_t pms_handle;
 
-HD44780* lcd_handle;
-
 SemaphoreHandle_t semaphore = xSemaphoreCreateBinary();
 
 template<typename ... Args>
@@ -49,8 +46,7 @@ bool IRAM_ATTR i2c_init(uint8_t dev_addr)
     i2c_config->scl_io_num = GPIO_NUM_22,
     i2c_config->sda_pullup_en = GPIO_PULLUP_DISABLE,
     i2c_config->scl_pullup_en = GPIO_PULLUP_DISABLE,
-    i2c_config->master.clk_speed = 100000;
-
+    i2c_config->master.clk_speed = 10000;
 
     i2c_param_config(I2C_NUM_0, i2c_config);
     i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0);
@@ -139,18 +135,26 @@ int8_t IRAM_ATTR user_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len
     return iError;
 }
 
-static void print_data(data_t* data){
-    
-    ESP_LOGI("LCD", "LCD Begin");
-    lcd_handle->clear();
-    lcd_handle->moveCursor(0, 0);
-    lcd_handle->write(string_format("TMP: %.1f, HUM: %.1f", data->temperature, data->humidity).c_str());
-    lcd_handle->moveCursor(0, 1);
-    lcd_handle->write(string_format("PRESS: %.1f", data->pressure).c_str());
-    lcd_handle->moveCursor(0, 2);
-    lcd_handle->write(string_format("PM2.5: %hhu, PM10: %hhu", data->pm2_5, data->pm10).c_str());
-    lcd_handle->moveCursor(0, 3);
-    lcd_handle->write(string_format("PM1: %hhu", data->pm1_0).c_str());
+static void print_mem() {
+    ESP_LOGI(
+        "MEM",
+        "Free Heap: %u bytes\n"
+        "  MALLOC_CAP_8BIT      %7zu bytes\n"
+        "  MALLOC_CAP_DMA       %7zu bytes\n"
+        "  MALLOC_CAP_SPIRAM    %7zu bytes\n"
+        "  MALLOC_CAP_INTERNAL  %7zu bytes\n"
+        "  MALLOC_CAP_DEFAULT   %7zu bytes\n"
+        "  MALLOC_CAP_IRAM_8BIT %7zu bytes\n"
+        "  MALLOC_CAP_RETENTION %7zu bytes\n",
+        xPortGetFreeHeapSize(),
+        heap_caps_get_free_size(MALLOC_CAP_8BIT),
+        heap_caps_get_free_size(MALLOC_CAP_DMA),
+        heap_caps_get_free_size(MALLOC_CAP_SPIRAM),
+        heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
+        heap_caps_get_free_size(MALLOC_CAP_DEFAULT),
+        heap_caps_get_free_size(MALLOC_CAP_IRAM_8BIT),
+        heap_caps_get_free_size(MALLOC_CAP_RETENTION)
+    );
 }
 
 static void pms_task(void *arg){
@@ -163,10 +167,14 @@ static void pms_task(void *arg){
             data->pm1_0 = pms_data->pm1_0;
             data->pm2_5 = pms_data->pm2_5;
             data->pm10 = pms_data->pm10;
+
             intertask::set_data(data);
+            print_mem();
         }
 
-        vTaskDelay(5000 / portTICK_PERIOD_MS);
+        delete pms_data;
+        pms_data = nullptr;
+        vTaskDelay(pdMS_TO_TICKS(20000));
     }
 }
 
@@ -174,10 +182,10 @@ static void mqtt_task(void *arg){
     esp_mqtt_client_config_t* mqtt_cfg = new esp_mqtt_client_config_t();
     mqtt_cfg->broker = {
         .address = {
-            .uri = "mqtt://192.168.1.217:1884",
+            .uri = "mqtt://192.168.1.217:9883",
             .hostname = "192.168.1.217",
             .path = "/mqtt",
-            .port = 1884
+            .port = 9883
         }
     };
     mqtt_cfg->credentials = {};
@@ -202,7 +210,7 @@ static void mqtt_task(void *arg){
         mqtt_client->send(TOPIC, data);
         mqtt_client->stop();
         intertask::clear_data();
-        vTaskDelay(90000/portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(90000));
     }
 }
 
@@ -212,22 +220,11 @@ extern "C" void app_main(void) {
     xSemaphoreGive(semaphore);
     esp_netif_init();
     esp_event_loop_create_default();
-    HD44780_t config;
-    config.backlight = false;
-    config.font = font_t::HD44780_FONT_5X8;
-    config.pins.rs = GPIO_NUM_19;
-    config.pins.d4 = GPIO_NUM_25;
-    config.pins.d5 = GPIO_NUM_15;
-    config.pins.d6 = GPIO_NUM_33;
-    config.pins.d7 = GPIO_NUM_13;
-    config.pins.e = GPIO_NUM_18;
-    config.write_cb = NULL;
 
+    
     wifi_manager* wifi = new wifi_manager("", "");
     Bosch* bosch = new Bosch(GPIO_NUM_21, GPIO_NUM_22);
-    lcd_handle = new HD44780();
-    
-    lcd_handle->init(&config);
+
     bosch->init();
     wifi->start();
     
@@ -236,13 +233,18 @@ extern "C" void app_main(void) {
 
     for(;;){
         data_t* data = intertask::get_data();
-        bme280_data* sensor_data = bosch->getData();
-
-        data->temperature = sensor_data->temperature;
+        bme280_data* sensor_data = bosch->getDataForcedMode();
+        double correctedTemperature = sensor_data->temperature - 1.1; //bme280 heating problem
+        
+        data->temperature = correctedTemperature;
         data->humidity = sensor_data->humidity;
         data->pressure = sensor_data->pressure;
 
-        print_data(data);
-        vTaskDelay(20000 / portTICK_PERIOD_MS);
+        print_mem();
+
+        delete sensor_data;
+        sensor_data = nullptr;
+
+        vTaskDelay(pdMS_TO_TICKS(60000));
     }
 }

@@ -1,0 +1,21 @@
+﻿apiVersion: batch/v1
+kind: Job
+metadata:
+  name: homestationdb-prepare
+  namespace: homestation
+spec:
+  template:
+    spec:
+      containers:
+        - name: homestationdb-prepare
+          image: mcr.microsoft.com/mssql-tools
+          command: ["/opt/mssql-tools/bin/sqlcmd"]
+          env:
+            - name: DbPassword
+              valueFrom:
+                secretKeyRef:
+                  key: DbPassword
+                  name: homestation-secrets
+          args: [ "-S", "homestationDb", "-U", "sa", "-P", "$(DbPassword)", "-C", "-I", "-Q", "IF NOT EXIST (SELECT * FROM sys.databases WHERE name = 'homestation') BEGIN CREATE DATABASE homestation; END;" ]
+      restartPolicy: Never
+  backoffLimit: 4

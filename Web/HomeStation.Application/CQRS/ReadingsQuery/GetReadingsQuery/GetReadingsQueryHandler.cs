@@ -3,7 +3,6 @@ using HomeStation.Application.Common.Exceptions;
 using HomeStation.Application.Common.Interfaces;
 using HomeStation.Domain.Common.Entities;
 using HomeStation.Domain.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace HomeStation.Application.CQRS.ReadingsQuery;
 
@@ -15,7 +14,7 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
     private readonly IUnitOfWork _unitOfWork;
 
     /// <inheritdoc cref="IQueryHandler{GetReadingsQuery,IEnumerable}"/>
-    public GetReadingsQueryHandler(IUnitOfWork unitOfWork) 
+    public GetReadingsQueryHandler(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }
@@ -27,25 +26,21 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
     /// <param name="cancellationToken">The <see cref="CancellationToken"/></param>
     /// <returns>The <see cref="IEnumerable{ReadingsWebModel}"/> of <see cref="ReadingsWebModel"/>.</returns>
     /// <exception cref="Exception">If device not found.</exception>
-    public async Task<IEnumerable<ReadingsWebModel>?> Handle(GetReadingsQuery query, CancellationToken cancellationToken)
+    public async Task<IEnumerable<ReadingsWebModel>?> Handle(GetReadingsQuery query,
+        CancellationToken cancellationToken)
     {
         if (query.StartDate == query.EndDate)
         {
             query.EndDate = query.EndDate.AddDays(1).AddTicks(-1);
         }
-        
-        Device? device = await GetData(query, cancellationToken);
-        
-        if (device == null)
-        {
-            throw new NotFoundException("Device not found");
-        }
-        
-        IEnumerable<ReadingsWebModel>? readings = GetReadings(query, device.Climate, device.AirQuality);
 
-        return LimitDataCount(readings, query.DetailLevel);
+        Device device = await GetData(query, cancellationToken);
+
+        IEnumerable<ReadingsWebModel> readings = GetReadings(query, device.Climate, device.AirQuality);
+
+        return LimitDataCount(readings, query.DetailLevel)?.OrderBy(d => d.ReadDate);
     }
-    
+
     /// <summary>
     /// Gets data from database
     /// </summary>
@@ -53,18 +48,42 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
     /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
     /// <returns>The <see cref="Device"/> with readings</returns>
     /// <exception cref="ArgumentOutOfRangeException">If unknown reading type.</exception>
-    private async Task<Device?> GetData(GetReadingsQuery query, CancellationToken cancellationToken)
+    private async Task<Device> GetData(GetReadingsQuery query, CancellationToken cancellationToken)
     {
         using IUnitOfWork unitOfWork = _unitOfWork;
+        Device device = await unitOfWork.DeviceRepository.GetObjectBy(x => x.Id == query.DeviceId,
+            cancellationToken: cancellationToken);
 
-        return await unitOfWork.DeviceRepository.GetObjectBy(
-            x => x.Id == query.DeviceId,
-            i => i
-                .Include(x => x.Climate.Where(y => query.StartDate < y.Reading.Date && y.Reading.Date < query.EndDate))
-                .Include(x => x.AirQuality.Where(y => query.StartDate < y.Reading.Date && y.Reading.Date < query.EndDate)),
-            cancellationToken);
+        if (device == null)
+        {
+            throw new NotFoundException("Device not found");
+        }
+
+        IEnumerable<Climate> climate = unitOfWork.ClimateRepository
+            .Get(q => q.Where(c => c.DeviceId == device.Id
+                                   && (query.StartDate.Year <= c.Reading.Date.Year &&
+                                       query.StartDate.Month <= c.Reading.Date.Month &&
+                                       query.StartDate.Day <= c.Reading.Date.Day) &&
+                                   (c.Reading.Date.Year <= query.EndDate.Year &&
+                                    c.Reading.Date.Month <= query.EndDate.Month &&
+                                    c.Reading.Date.Day <= query.EndDate.Day)))
+            .AsEnumerable();
+        IEnumerable<Quality> quality = unitOfWork.QualityRepository
+            .Get(q => q.Where(q => q.DeviceId == device.Id
+                                   && (query.StartDate.Year <= q.Reading.Date.Year &&
+                                       query.StartDate.Month <= q.Reading.Date.Month &&
+                                       query.StartDate.Day <= q.Reading.Date.Day) &&
+                                   (q.Reading.Date.Year <= query.EndDate.Year &&
+                                    q.Reading.Date.Month <= query.EndDate.Month &&
+                                    q.Reading.Date.Day <= query.EndDate.Day)))
+            .AsEnumerable();
+
+        device.AirQuality = quality.ToList();
+        device.Climate = climate.ToList();
+
+        return device;
     }
-    
+
     /// <summary>
     /// Converts database readings to web model
     /// </summary>
@@ -72,7 +91,8 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
     /// <param name="climateReadings">The optional <see cref="IEnumerable{Climate}"/> of <see cref="Climate"/>.</param>
     /// <param name="airQualityReadings">The optional <see cref="IEnumerable{Quality}"/> of <see cref="Quality"/>.</param>
     /// <returns>The <see cref="IEnumerable{ReadingsWebModel}"/> of <see cref="ReadingsWebModel"/>.</returns>
-    private static IEnumerable<ReadingsWebModel>? GetReadings(GetReadingsQuery query, IEnumerable<Climate>? climateReadings, IEnumerable<Quality>? airQualityReadings)
+    private static IEnumerable<ReadingsWebModel> GetReadings(GetReadingsQuery query,
+        IEnumerable<Climate>? climateReadings, IEnumerable<Quality>? airQualityReadings)
     {
         if (climateReadings == null)
         {
@@ -80,8 +100,8 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
             {
                 DeviceId = query.DeviceId,
                 Pm1_0 = x.Pm1_0,
-                Pm2_5 = x?.Pm2_5,
-                Pm10 = x?.Pm10,
+                Pm2_5 = x.Pm2_5,
+                Pm10 = x.Pm10,
                 ReadDate = x.Reading.Date
             });
         }
@@ -91,43 +111,52 @@ public class GetReadingsQueryHandler : IQueryHandler<GetReadingsQuery, IEnumerab
             return climateReadings.Select(x => new ReadingsWebModel
             {
                 DeviceId = query.DeviceId,
-                Temperature = x?.Temperature,
-                Humidity = x?.Humidity,
-                Pressure = x?.Pressure,
+                Temperature = x.Temperature,
+                Humidity = x.Humidity,
+                Pressure = x.Pressure,
                 ReadDate = x.Reading.Date
             });
         }
         
-        return from climate in climateReadings
-            join air in airQualityReadings
-                on climate?.DeviceId equals air?.DeviceId
-            select
-                new ReadingsWebModel
-                {
-                    DeviceId = query.DeviceId,
-                    Temperature = climate?.Temperature,
-                    Humidity = climate?.Humidity,
-                    Pressure = climate?.Pressure,
-                    Pm1_0 = air?.Pm1_0,
-                    Pm2_5 = air?.Pm2_5,
-                    Pm10 = air?.Pm10,
-                    ReadDate = air.Reading.Date
-                };
+		Dictionary<DateTimeOffset, ReadingsWebModel> readings = climateReadings.ToDictionary(k => k.Reading.Date, v =>
+            new ReadingsWebModel()
+            {
+                DeviceId = query.DeviceId,
+                Temperature = v.Temperature,
+                Humidity = v.Humidity,
+                Pressure = v.Pressure,
+                ReadDate = v.Reading.Date
+            });
+
+        foreach (var airQuality in airQualityReadings)
+        {
+            if (!readings.TryGetValue(airQuality.Reading.Date, out ReadingsWebModel webModel))
+            {
+                continue;
+            }
+            
+            webModel.Pm1_0 = airQuality.Pm1_0;
+            webModel.Pm2_5 = airQuality.Pm2_5;
+            webModel.Pm10 = airQuality.Pm10;
+        }
+
+        return readings.Values;
     }
-    
+
     /// <summary>
     /// Limits the returned data
     /// </summary>
     /// <param name="readings">The optional <see cref="IEnumerable{ReadingsWebModel}"/> of <see cref="ReadingsWebModel"/></param>
     /// <param name="detailLevel">The <see cref="DetailLevel"/> enumerable.</param>
     /// <returns>The <see cref="IEnumerable{ReadingsWebModel}"/> of <see cref="ReadingsWebModel"/>.</returns>
-    private static IEnumerable<ReadingsWebModel>? LimitDataCount(IEnumerable<ReadingsWebModel>? readings, DetailLevel detailLevel)
+    private static IEnumerable<ReadingsWebModel>? LimitDataCount(IEnumerable<ReadingsWebModel>? readings,
+        DetailLevel detailLevel)
     {
         if (readings == null || !readings.Any())
         {
-            return Enumerable.Empty<ReadingsWebModel>();
+            return [];
         }
-        
+
         int? limit = detailLevel switch
         {
             DetailLevel.Normal => 1000,

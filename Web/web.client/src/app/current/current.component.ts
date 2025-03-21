@@ -8,13 +8,14 @@ import {ReadingsService} from "../shared/services/readings.service";
 
 @Component({
   selector: 'app-current',
+  standalone: false,
   templateUrl: './current.component.html',
   styleUrl: './current.component.css'
 })
 export class CurrentComponent implements OnInit {
 
   protected devices: Observable<Array<Device>> = of([]);
-  protected device: Device = {} as Device;
+  protected device: Device | undefined;
   protected reading: Readings | undefined;
   protected loaded: boolean = false;
   protected interval: any | undefined;
@@ -24,54 +25,64 @@ export class CurrentComponent implements OnInit {
               private readingsService: ReadingsService) {
   }
   ngOnInit(): void {
-    this.getDevices();
-    if(this.device == undefined || this.device == {} as Device){
-      this.devices.subscribe((complete) => {
-        let firstDevice: Device | undefined = complete.at(0);
+    this.devices = this.service.getDevices();
+    this.devices.subscribe({
+      next: value => {
+        this.getReadingForStoredDevice(value);
+      },
+      error: error => console.error(error),
+    });
+  }
 
-        if(firstDevice != undefined){
-          this.device = firstDevice;
-        }
-      });
-    }
+  getReadingForStoredDevice(devices: Device[]){
+    const stored = this.storage.getLastSelectedDevice();
+    const storedDevice = devices.find(x => x.name === stored);
 
-    let storedDevice = this.storage.getLastSelectedDeviceId();
-    if(storedDevice != undefined){
+    if(stored && storedDevice) {
+      this.getData(storedDevice.id);
+
       this.interval = setInterval(() => {
-        this.getReading({ id: storedDevice,  } as Device);
+        this.getReading(storedDevice);
       }, 20000);
 
       this.loaded = true;
     }
-  }
 
-  getDevices() {
-    this.devices = this.service.getDevices();
-  }
-
-  getReading(device: Device){
-    let deviceId = this.storage.getLastSelectedDeviceId();
-
-    if(device != undefined || device != {} as Device){
-      this.getData(device.id)
-    } else if(deviceId != undefined){
-      this.getData(deviceId)
+    if(stored != storedDevice?.name){
+      this.storage.clear('lastSelectedDevice');
+    } else {
+      this.device = storedDevice;
     }
-
-    if(this.interval == undefined || deviceId != device.id){
+  }
+  
+  getReading(device: Device | undefined){
+    if(!device){
+      return;
+    }
+    this.getData(device.id);
+    
+    this.device = device;
+    
+    if(this.device){
+      this.storage.setLastSelectedDevice(this.device!.name);
+    }
+    
+    if(!this.interval){
       this.interval = setInterval(() => {
-        this.getReading({ id: device.id } as Device);
+        this.getReading(device);
       }, 20000);
     }
+    
   }
 
   private getData(deviceId: number){
     this.readingsService.getLatestReading(deviceId)
         .subscribe({
           next: v => this.reading = v,
-          complete: () => this.loaded = true,
-          error: err => { console.error(err)}
-        })
-    this.storage.setLastSelectedDevice(deviceId);
+          complete: () => {
+            this.loaded = true;
+          },
+          error: err =>  console.error(err)
+        });
   }
 }
