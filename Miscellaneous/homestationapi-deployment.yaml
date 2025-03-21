@@ -25,7 +25,10 @@ spec:
             - name: ASPNETCORE_HTTP_PORTS
               value: "80"
             - name: Database__ConnectionString
-              value: "" #example, move to secrets
+              valueFrom:
+                secretKeyRef:
+                  key: ConnectionString
+                  name: homestation-secrets
           image: 127.0.0.1:5000/homestation2-homestation_api:latest #specify image registry
           name: homestationapi
           ports:

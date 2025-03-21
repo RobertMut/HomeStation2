@@ -222,7 +222,7 @@ extern "C" void app_main(void) {
     esp_event_loop_create_default();
 
     
-    wifi_manager* wifi = new wifi_manager("T-Mobile_Swiatlowod_0756", "65398836021231326080");
+    wifi_manager* wifi = new wifi_manager("", "");
     Bosch* bosch = new Bosch(GPIO_NUM_21, GPIO_NUM_22);
 
     bosch->init();

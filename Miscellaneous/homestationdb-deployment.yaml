@@ -60,7 +60,10 @@ spec:
             - name: ACCEPT_EULA
               value: "Y"
             - name: SA_PASSWORD
-              value: "P@ssword" #example, move to secrets
+              valueFrom:
+                secretKeyRef:
+                  key: DbPassword
+                  name: homestation-secrets
           volumeMounts:
             - name: sqlserver-data
               mountPath: "/var/opt/mssql"

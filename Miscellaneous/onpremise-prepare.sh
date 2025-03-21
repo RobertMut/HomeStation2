@@ -28,7 +28,7 @@ then
    echo "Some or all of the parameters are empty";
    helpFunction
 fi
-
+cd ~
 echo "UFW - allow connection"
 sudo ufw allow 6443/tcp #apiserver
 sudo ufw allow from 10.42.0.0/16 to any #pods
