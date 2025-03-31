@@ -4,4 +4,4 @@ metadata:
   name: tcp-services
   namespace: ingress-nginx
 data:
-  9883: "homestation/homestationapi:9883"
+  1883: "homestation/homestationapi:1883" #Customize MQTT port, should be the same as service port

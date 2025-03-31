@@ -27,9 +27,9 @@ spec:
               value: "http://homestationApi/homestation/"
           ports:
             - name: "https"
-              containerPort: 9443
+              containerPort: 8443 #Customize HTTPS port - will be deleted in future, ingress configuration uses HTTP
             - name: "http"
-              containerPort: 9080
+              containerPort: 8080 #Customzize HTTP port
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -44,14 +44,14 @@ metadata:
   name: homestationweb
 spec:
   ports:
-    - name: "http"
-      port: 9080
+    - name: "http" #customize HTTP port
+      port: 8080 #Service port to communication, should be the same in a ingress
       protocol: TCP
       targetPort: 80
-    - name: "https"
-      port: 9443
+    - name: "https" #customize HTTPS port
+      port: 8443 #Service port to communication, should be the same in a ingress
       protocol: TCP
-      targetPort: 443
+      targetPort: 443 
   selector:
     app.kubernetes.io/name: homestationweb
 ---
@@ -72,6 +72,6 @@ spec:
               service:
                 name: homestationweb
                 port:
-                  number: 9080
+                  number: 8080 #Exposed HTTP port, should be the same as service port
             pathType: Prefix
   ingressClassName: nginx

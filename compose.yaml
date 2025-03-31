@@ -9,7 +9,7 @@ services:
         container_name: homestationDb
         image: mcr.microsoft.com/mssql/server:2022-latest
         environment:
-            - SA_PASSWORD=Pass@word
+            - SA_PASSWORD=<AwesomePassword>
             - ACCEPT_EULA=Y
         ports:
             - "1433:1433"
@@ -23,12 +23,13 @@ services:
         container_name: homestationApi
         environment:
             - ASPNETCORE_HTTP_PORTS=80
+            - Database__ConnectionString=Data Source=localhost,1433;Database=homestation;User Id=sa;Password=<AwesomePassword>;Encrypt=False;TrustServerCertificate=True
         build:
             context: ./Web
             dockerfile: Dockerfile
         ports:
             - "1883:1883"
-            - "9180:80"
+            - "8180:80"
         networks:
             - homestation
         depends_on:
@@ -41,10 +42,10 @@ services:
         build:
             context: ./Web/web.client
             args:
-                - HREF=/homestation/
+                - HREF=/homestation/ #If you want to use /homestation/ suffix to address otherwise replace with /
         ports:
-            - "9080:80"
-            - "9443:443"
+            - "8080:80"
+            - "8443:443"
         depends_on:
             - homestation_api
         networks:
