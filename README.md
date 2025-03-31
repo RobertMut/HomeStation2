@@ -1,6 +1,6 @@
 ﻿Links:
-- :point_right: Demo
-- :newspaper: Blog post
+- [:point_right: Demo](https://mutnianski.dev/homestation/)
+- [:newspaper: Blog post](https://mutnianski.dev/portfolio/2025/03/24/HomeStation.html)
 
 # Description
 IoT-based measurement solution of environmental parameters in the home environment using ESP-IDF, MQTT, ASP.NET, Angular.
@@ -486,3 +486,25 @@ services:
     ingressClassName: nginx
   ```
 - Apply deployment file `kubectl apply -f Miscellaneous/homestationweb-deployment.yaml`
+
+# Device Set-up
+## Prerequisites
+- [Install Visual Studio Code](https://code.visualstudio.com/)
+- [Install PlatformIO](https://platformio.org/)
+- [Install ESP-IDF](https://idf.espressif.com/) (if not installed with PlatformIO)
+- If you use ESP32-WROOM development board
+  - Connect the sensors (Plantower PMS 3003, Bosch BME280) to device
+- If you use own device
+  - Setup MQTT client address and port to HomeStation's API
+  - Send data using this interface
+    ```json
+    {
+      "deviceid": 0, //the device id number,
+      "temperature": 0.0, //double e.g 24.9,
+      "humidity": 0.0, //double e.g 100321.6,
+      "pressure": 0.0, //double e.g 44.4,
+      "pm1_0": "0", //uint e.g 9,
+      "pm2_5": "0", //uint e.g 1,
+      "pm10": "0", //uint e.g 2
+    }
+    ```
