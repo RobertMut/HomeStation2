@@ -136,8 +136,8 @@ then
     --namespace ingress-nginx --create-namespace \
     --set controller.extraArgs.tcp-services-configmap=ingress-nginx/tcp-services \
     --set controller.allowSnippetAnnotations=true
-  kubectl patch deployment ingress-nginx-controller -n ingress-nginx --patch '{ "spec": { "template": { "spec": { "containers": [ { "name": "controller", "ports": [ { "name": "mqtt", "containerPort": 9883, "protocol": "TCP" } ] } ] } } } }'
-  kubectl patch service ingress-nginx-controller -n ingress-nginx --patch '{ "spec": { "ports": [ { "appProtocol": "mqtt", "name": "mqtt", "nodePort": 30843, "port": 9883, "protocol": "TCP", "targetPort": "mqtt" } ] } }'
+  kubectl patch deployment ingress-nginx-controller -n ingress-nginx --patch '{ "spec": { "template": { "spec": { "containers": [ { "name": "controller", "ports": [ { "name": "mqtt", "containerPort": 1883, "protocol": "TCP" } ] } ] } } } }'
+  kubectl patch service ingress-nginx-controller -n ingress-nginx --patch '{ "spec": { "ports": [ { "appProtocol": "mqtt", "name": "mqtt", "nodePort": 30843, "port": 1883, "protocol": "TCP", "targetPort": "mqtt" } ] } }'
 fi
 
 kubectl create namespace homestation

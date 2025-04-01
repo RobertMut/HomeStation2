@@ -1,4 +1,4 @@
-﻿apiVersion: batch/v1
+﻿apiVersion: batch/v1 #This job should be run after the database is up
 kind: Job
 metadata:
   name: homestationdb-prepare
@@ -15,7 +15,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: DbPassword
-                  name: homestation-secrets
+                  name: homestation-secrets #Specify secret name or replace with `value: "<your password>"`, after removing valueFrom:
           args: [ "-S", "homestationDb", "-U", "sa", "-P", "$(DbPassword)", "-C", "-I", "-Q", "IF NOT EXIST (SELECT * FROM sys.databases WHERE name = 'homestation') BEGIN CREATE DATABASE homestation; END;" ]
       restartPolicy: Never
   backoffLimit: 4

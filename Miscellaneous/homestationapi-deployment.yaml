@@ -19,11 +19,11 @@ spec:
       containers:
         - env:
             - name: MQTT__Port
-              value: "1883"
+              value: "1883" #Pod Internal MQTT Port
             - name: MQTT__Address
-              value: "0.0.0.0"
+              value: "0.0.0.0" #Listen on all
             - name: ASPNETCORE_HTTP_PORTS
-              value: "80"
+              value: "80" #Pod internal HTTP port
             - name: Database__ConnectionString
               valueFrom:
                 secretKeyRef:
@@ -32,9 +32,9 @@ spec:
           image: 127.0.0.1:5000/homestation2-homestation_api:latest #specify image registry
           name: homestationapi
           ports:
-            - containerPort: 9883
+            - containerPort: 1883 #Customize MQTT port
               protocol: TCP
-            - containerPort: 9180
+            - containerPort: 8180 #Customize HTTP port
               protocol: TCP
       restartPolicy: Always
 ---
@@ -47,11 +47,11 @@ metadata:
   namespace: homestation
 spec:
   ports:
-    - name: "9883"
-      port: 9883
+    - name: "1883" #Customize MQTT port
+      port: 1883 #Service port to communication, should be the same in a ingress
       protocol: TCP
-      targetPort: 1883
-    - name: "80"
+      targetPort: 1883 #Container port should be the same as target port
+    - name: "80" #Customize HTTP port, rules same as above
       port: 9180
       protocol: TCP
       targetPort: 80
@@ -75,6 +75,6 @@ spec:
               service:
                 name: homestationapi
                 port:
-                  number: 9180
+                  number: 9180 #HTTP port
             pathType: ImplementationSpecific
   ingressClassName: nginx

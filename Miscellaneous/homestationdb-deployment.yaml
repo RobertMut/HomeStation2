@@ -52,9 +52,9 @@ spec:
         - name: homestationdb
           image: mcr.microsoft.com/mssql/rhel/server:2022-latest
           ports:
-            - name: "1433port"
+            - name: "1433port" #Customize SQL Server port
               containerPort: 1433
-            - name: "1434port"
+            - name: "1434port" #Customize SQL Server port
               containerPort: 1434
           env:
             - name: ACCEPT_EULA
@@ -63,7 +63,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: DbPassword
-                  name: homestation-secrets
+                  name: homestation-secrets #Specify other secret if needed, or remove everything under valueFrom: and replace with `value: "<your password>"`
           volumeMounts:
             - name: sqlserver-data
               mountPath: "/var/opt/mssql"
@@ -85,13 +85,13 @@ metadata:
   namespace: homestation
 spec:
   ports:
-    - name: "1433port"
-      port: 1433
-      targetPort: 1433
+    - name: "1433port" #Customize SQL Server port
+      port: 1433 #Used for communication between pods, ingresses etc.
+      targetPort: 1433 #Same as container port
       protocol: TCP
-    - name: "1434port"
-      port: 1434
-      targetPort: 1434
+    - name: "1434port" #Customize SQL Server port
+      port: 1434 #Used for communication between pods, ingresses etc.
+      targetPort: 1434 #Same as container port
       protocol: UDP
   selector:
     app.kubernetes.io/name: homestationdb
