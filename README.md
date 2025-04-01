@@ -31,11 +31,27 @@ Also, continuation of my [Engineer's thesis](https://github.com/RobertMut/HomeSt
 - (Optional) Kubernetes
 - ESP32-WROOM
 
+
+# First run
+- Make sure that the application is deployed correctly via [Docker](#getting-started---docker-launch) or [Kubernetes](#getting-started---kubernetes)
+- Make sure that the [device is connected](#device-set-up)
+- Open sidebar and click on three lines
+  ![](https://mutnianski.dev/assets/images/homestation2/homestation2_sidepanel.png)
+- You see your device name with `plus` next to it
+  ![](https://mutnianski.dev/assets/images/homestation2/homestation2_sidepanelexpanded.png)
+- Click on the `plus` and it should change to `X` button, it means that you've permitted logging for this device
+  ![](https://mutnianski.dev/assets/images/homestation2/homestation2_sidepanel_accepted.png)
+- Refresh the page and after a while you should be able to select the device from select box, then choose it.
+  ![](https://mutnianski.dev/assets/images/homestation2/homestation2_currentdeviceselected.png)
+- Now you should see the data from the device
+  ![](https://mutnianski.dev/assets/images/homestation2/homestation2_exampledata.png)
+  ![](https://mutnianski.dev/assets/images/homestation2/homestation2_pressure.png)
+  ![](https://mutnianski.dev/assets/images/homestation2/homestation2_airquality.png)
 # Getting started - Docker launch
 ## Prerequisites
 - Install [Docker](https://docs.docker.com/get-started/get-docker/)
 - Clone repository `git clone https://github.com/RobertMut/HomeStation2.git`
-- Set up device
+- [Set up device](#device-set-up)
 - Prepare `compose.yaml` file
     ```yaml
     volumes:
@@ -105,7 +121,7 @@ Also, continuation of my [Engineer's thesis](https://github.com/RobertMut/HomeSt
 - Create registry (skip if already installed)
 - [Install ingress-nginx](https://kubernetes.github.io/ingress-nginx/deploy/) with parameter `--set controller.extraArgs.tcp-services-configmap=ingress-nginx/tcp-services`
 - Clone repository `git clone https://github.com/RobertMut/HomeStation2.git`
-- Set up device
+- [Set up device](#device-set-up)
 - Create namespace `kubectl create namespace homestation`
 - Prepare [tcp-services ConfigMap](./Miscellaneous/ingress-nginx.yaml)
   ```yaml
@@ -486,14 +502,32 @@ services:
     ingressClassName: nginx
   ```
 - Apply deployment file `kubectl apply -f Miscellaneous/homestationweb-deployment.yaml`
+- After a while you should be welcomed with this page:
+  ![](https://mutnianski.dev/assets/images/homestation2/homestation2_emptystate.png)
 
 # Device Set-up
 ## Prerequisites
 - [Install Visual Studio Code](https://code.visualstudio.com/)
 - [Install PlatformIO](https://platformio.org/)
 - [Install ESP-IDF](https://idf.espressif.com/) (if not installed with PlatformIO)
-- If you use ESP32-WROOM development board
+- If you use repository's code and NodeMCU ESP32-WROOM
   - Connect the sensors (Plantower PMS 3003, Bosch BME280) to device
+    ![](https://mutnianski.dev/assets/images/homestation2/homestation2_sensors_connection_schem.png)
+  - Set Wi-Fi credentials in [`main.cpp`](./device/src/main.cpp)
+  ```
+  225   wifi_manager* wifi = new wifi_manager("SSID", "Password"); 
+  ```
+  - Set MQTT broker address in [`main.cpp`](./device/src/main.cpp)
+  ```
+  183    mqtt_cfg->broker = {
+  184      .address = {
+  185          .uri = "mqtt://addr:port", //e.g 192.168.1.10:1883
+  186          .hostname = "192.168.1.10", //e.g localhost
+  187          .path = "/mqtt", //default path
+  189          .port = 1883 //default port
+  190      }
+  191  };
+  ```
 - If you use own device
   - Setup MQTT client address and port to HomeStation's API
   - Send data using this interface
