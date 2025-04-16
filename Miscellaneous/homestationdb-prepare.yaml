@@ -16,6 +16,6 @@ spec:
                 secretKeyRef:
                   key: DbPassword
                   name: homestation-secrets #Specify secret name or replace with `value: "<your password>"`, after removing valueFrom:
-          args: [ "-S", "homestationDb", "-U", "sa", "-P", "$(DbPassword)", "-C", "-I", "-Q", "IF NOT EXIST (SELECT * FROM sys.databases WHERE name = 'homestation') BEGIN CREATE DATABASE homestation; END;" ]
+          args: [ "-S", "homestationDb", "-U", "sa", "-P", "$(DbPassword)", "-C", "-I", "-Q", "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'homestation') BEGIN CREATE DATABASE homestation; END;" ]
       restartPolicy: Never
   backoffLimit: 4

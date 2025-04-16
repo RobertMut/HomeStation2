@@ -37,7 +37,10 @@ export class CurrentComponent implements OnInit {
   getReadingForStoredDevice(devices: Device[]){
     const stored = this.storage.getLastSelectedDevice();
     const storedDevice = devices.find(x => x.name === stored);
-
+    //demo
+    const firstDevice = devices.at(0);
+    //
+    
     if(stored && storedDevice) {
       this.getData(storedDevice.id);
 
@@ -46,6 +49,17 @@ export class CurrentComponent implements OnInit {
       }, 20000);
 
       this.loaded = true;
+      //demo
+    } else if (firstDevice) {
+
+      this.getData(firstDevice!.id);
+
+      this.interval = setInterval(() => {
+        this.getReading(storedDevice);
+      }, 20000);
+
+      this.loaded = true;
+      //demo
     }
 
     if(stored != storedDevice?.name){
