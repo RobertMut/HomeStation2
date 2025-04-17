@@ -10,7 +10,7 @@
     <ng-template #devicesPresent>
         <mat-form-field>
             <mat-label>Device</mat-label>
-            <mat-select (valueChange)="getReading($event)" [(value)]="result[0]">
+            <mat-select (valueChange)="getReading($event)">
                 <mat-option *ngFor="let device of result" [value]="device" >{{ device.name }}</mat-option>
             </mat-select>
         </mat-form-field>
