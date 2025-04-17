@@ -1,5 +1,5 @@
 ﻿volumes:
-  sqlserver_data:
+    sqlserver_data:
 networks:
     homestation:
         driver: bridge
@@ -9,7 +9,7 @@ services:
         container_name: homestationDb
         image: mcr.microsoft.com/mssql/server:2022-latest
         environment:
-            MSSQL_SA_PASSWORD: "StrongP@ssw0rd1"
+            MSSQL_SA_PASSWORD: "<StrongPass>"
             ACCEPT_EULA: "Y"
         ports:
             - "1433:1433"
@@ -24,12 +24,12 @@ services:
             timeout: 30s
             retries: 30
             start_period: 5s
-        
+    
     homestation_api:
         container_name: homestationApi
         environment:
             ASPNETCORE_HTTP_PORTS: "80"
-            Database__ConnectionString: "Data Source=homestationDb,1433;Database=homestation;User Id=sa;Password=StrongP@ssw0rd1;Encrypt=False;TrustServerCertificate=True"
+            Database__ConnectionString: "Data Source=homestationDb,1433;Database=homestation;User Id=sa;Password=<StrongPass>;Encrypt=False;TrustServerCertificate=True"
         build:
             context: ./Web
             dockerfile: Dockerfile
