@@ -51,7 +51,7 @@ export class CurrentComponent implements OnInit {
       this.loaded = true;
       //demo
     } else if (firstDevice) {
-
+      this.device = firstDevice;
       this.getData(firstDevice!.id);
 
       this.interval = setInterval(() => {
