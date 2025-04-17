@@ -37,10 +37,7 @@ export class CurrentComponent implements OnInit {
   getReadingForStoredDevice(devices: Device[]){
     const stored = this.storage.getLastSelectedDevice();
     const storedDevice = devices.find(x => x.name === stored);
-    //demo
-    const firstDevice = devices.at(0);
-    //
-    
+
     if(stored && storedDevice) {
       this.getData(storedDevice.id);
 
@@ -49,17 +46,6 @@ export class CurrentComponent implements OnInit {
       }, 20000);
 
       this.loaded = true;
-      //demo
-    } else if (firstDevice) {
-      this.device = firstDevice;
-      this.getData(firstDevice!.id);
-
-      this.interval = setInterval(() => {
-        this.getReading(storedDevice);
-      }, 20000);
-
-      this.loaded = true;
-      //demo
     }
 
     if(stored != storedDevice?.name){
@@ -68,25 +54,25 @@ export class CurrentComponent implements OnInit {
       this.device = storedDevice;
     }
   }
-  
+
   getReading(device: Device | undefined){
     if(!device){
       return;
     }
     this.getData(device.id);
-    
+
     this.device = device;
-    
+
     if(this.device){
       this.storage.setLastSelectedDevice(this.device!.name);
     }
-    
+
     if(!this.interval){
       this.interval = setInterval(() => {
         this.getReading(device);
       }, 20000);
     }
-    
+
   }
 
   private getData(deviceId: number){
