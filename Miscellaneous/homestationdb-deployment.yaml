@@ -59,6 +59,8 @@ spec:
           env:
             - name: ACCEPT_EULA
               value: "Y"
+            - name: MSSQL_DATA_DIR
+              value: /var/opt/mssql/data
             - name: MSSQL_SA_PASSWORD
               valueFrom:
                 secretKeyRef:
