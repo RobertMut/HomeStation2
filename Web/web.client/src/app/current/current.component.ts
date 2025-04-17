@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {DevicesService} from "../shared/services/devices.service";
 import {Device} from "../shared/interfaces/device";
-import {Observable, delay, of, startWith, filter} from 'rxjs';
+import {Observable, delay, of, startWith, filter, tap} from 'rxjs';
 import {Readings} from "../shared/interfaces/readings";
 import {StorageService} from "../shared/services/storage.service";
 import {ReadingsService} from "../shared/services/readings.service";
@@ -23,9 +23,14 @@ export class CurrentComponent implements OnInit {
   constructor(private service: DevicesService,
               private storage: StorageService,
               private readingsService: ReadingsService) {
+    this.devices = this.service.getDevices().pipe(
+        tap(
+            value => this.device = value.at(0)
+        )
+    );
+
   }
   ngOnInit(): void {
-    this.devices = this.service.getDevices();
     this.devices.subscribe({
       next: value => {
         this.getReadingForStoredDevice(value);
@@ -37,10 +42,7 @@ export class CurrentComponent implements OnInit {
   getReadingForStoredDevice(devices: Device[]){
     const stored = this.storage.getLastSelectedDevice();
     const storedDevice = devices.find(x => x.name === stored);
-    //demo
-    const firstDevice = devices.at(0);
-    //
-    
+
     if(stored && storedDevice) {
       this.getData(storedDevice.id);
 
@@ -50,12 +52,11 @@ export class CurrentComponent implements OnInit {
 
       this.loaded = true;
       //demo
-    } else if (firstDevice) {
-      this.device = firstDevice;
-      this.getData(firstDevice!.id);
+    } else if (this.device) {
+      this.getData(this.device!.id);
 
       this.interval = setInterval(() => {
-        this.getReading(storedDevice);
+        this.getReading(this.device);
       }, 20000);
 
       this.loaded = true;
