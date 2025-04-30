@@ -61,7 +61,7 @@ spec:
               value: "Y"
             - name: MSSQL_DATA_DIR
               value: /var/opt/mssql/data
-            - name: MSSQL_SA_PASSWORD
+            - name: MSSQL_SA_PASSWORD #SA_PASSWORD is deprecated - https://learn.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-ver16&tabs=cli&pivots=cs1-bash#run-the-container-2
               valueFrom:
                 secretKeyRef:
                   key: DbPassword
