@@ -1,5 +1,5 @@
 ﻿volumes:
-  sqlserver_data:
+    sqlserver_data:
 networks:
     homestation:
         driver: bridge
@@ -9,8 +9,8 @@ services:
         container_name: homestationDb
         image: mcr.microsoft.com/mssql/server:2022-latest
         environment:
-            - SA_PASSWORD=<AwesomePassword>
-            - ACCEPT_EULA=Y
+            MSSQL_SA_PASSWORD: "<StrongPass>"
+            ACCEPT_EULA: "Y"
         ports:
             - "1433:1433"
         networks:
@@ -18,12 +18,18 @@ services:
         volumes:
             - sqlserver_data:/var/opt/mssql
         restart: always
-        
+        healthcheck:
+            test: /opt/mssql-tools18/bin/sqlcmd -S localhost -C -I -U sa -P $$MSSQL_SA_PASSWORD -Q "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'homestation') BEGIN CREATE DATABASE homestation; END; SELECT 1;" -b -o /dev/null
+            interval: 5s
+            timeout: 30s
+            retries: 30
+            start_period: 5s
+    
     homestation_api:
         container_name: homestationApi
         environment:
-            - ASPNETCORE_HTTP_PORTS=80
-            - Database__ConnectionString=Data Source=localhost,1433;Database=homestation;User Id=sa;Password=<AwesomePassword>;Encrypt=False;TrustServerCertificate=True
+            ASPNETCORE_HTTP_PORTS: "80"
+            Database__ConnectionString: "Data Source=homestationDb,1433;Database=homestation;User Id=sa;Password=<StrongPass>;Encrypt=False;TrustServerCertificate=True"
         build:
             context: ./Web
             dockerfile: Dockerfile

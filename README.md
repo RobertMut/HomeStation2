@@ -53,65 +53,71 @@ Also, continuation of my [Engineer's thesis](https://github.com/RobertMut/HomeSt
 - Clone repository `git clone https://github.com/RobertMut/HomeStation2.git`
 - [Set up device](#device-set-up)
 - Prepare `compose.yaml` file
-    ```yaml
-    volumes:
+  ```yaml
+  volumes:
       sqlserver_data:
-    networks:
-        homestation:
-            driver: bridge
-    
-    services:
-        homestation_db:
-            container_name: homestationDb
-            image: mcr.microsoft.com/mssql/server:2022-latest
-            environment:
-                - SA_PASSWORD=<AwesomePassword> #Or use secret https://docs.docker.com/compose/how-tos/use-secrets/#use-secrets
-                - ACCEPT_EULA=Y
-            ports:
-                - "1433:1433"
-            networks:
-                - homestation
-            volumes:
-                - sqlserver_data:/var/opt/mssql
-            restart: always
-            
-        homestation_api:
-            container_name: homestationApi
-            environment:
-                - ASPNETCORE_HTTP_PORTS=80
-                - Database__ConnectionString=Data Source=localhost,1433;Database=homestation;User Id=sa;Password=<AwesomePassword>;Encrypt=False;TrustServerCertificate=True #Or use secret
-            build:
-                context: ./Web
-                dockerfile: Dockerfile
-            ports:
-                - "1883:1883"
-                - "9180:80"
-            networks:
-                - homestation
-            depends_on:
-                homestation_db:
-                    condition: service_started
-            restart: always
-        
-        homestation_web:
-            container_name: homestationWeb
-            build:
-                context: ./Web/web.client
-                args:
-                    - HREF=/homestation/
-            ports:
-                - "9080:80"
-                - "9443:443"
-            depends_on:
-                - homestation_api
-            networks:
-                - homestation
-            restart: always
-    ```
+  networks:
+      homestation:
+          driver: bridge
+  
+  services:
+      homestation_db:
+          container_name: homestationDb
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          environment:
+              MSSQL_SA_PASSWORD: "<StrongPass>" #SA_PASSWORD is deprecated - https://learn.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-ver16&tabs=cli&pivots=cs1-bash#run-the-container-2
+              ACCEPT_EULA: "Y"
+          ports:
+              - "1433:1433"
+          networks:
+              - homestation
+          volumes:
+              - sqlserver_data:/var/opt/mssql
+          restart: always
+          healthcheck:
+              test: /opt/mssql-tools18/bin/sqlcmd -S localhost -C -I -U sa -P $$MSSQL_SA_PASSWORD -Q "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'homestation') BEGIN CREATE DATABASE homestation; END; SELECT 1;" -b -o /dev/null
+              interval: 5s
+              timeout: 30s
+              retries: 30
+              start_period: 5s
+      
+      homestation_api:
+          container_name: homestationApi
+          environment:
+              ASPNETCORE_HTTP_PORTS: "80"
+              Database__ConnectionString: "Data Source=homestationDb,1433;Database=homestation;User Id=sa;Password=<StrongPass>;Encrypt=False;TrustServerCertificate=True" //Define password, or move to secrets
+          build:
+              context: ./Web
+              dockerfile: Dockerfile
+          ports:
+              - "1883:1883"
+              - "8180:80"
+          networks:
+              - homestation
+          depends_on:
+              homestation_db:
+                  condition: service_started
+          restart: always
+      
+      homestation_web:
+          container_name: homestationWeb
+          build:
+              context: ./Web/web.client
+              args:
+                  - HREF=/homestation/ #If you want to use /homestation/ suffix to address otherwise replace with /
+          ports:
+              - "8080:80"
+              - "8443:443"
+          depends_on:
+              - homestation_api
+          networks:
+              - homestation
+          restart: always
+  ```
 ## Run
 - Run `docker compose -f compose.yaml up -d` in the same directory as `compose.yaml`
 - Wait for the containers to start
-- Open `http://localhost:9080/homestation/` in your browser
+- Open `http://localhost:8080/homestation/` in your browser
 - You should be welcomed with this page:
   ![](https://mutnianski.dev/assets/images/homestation2/homestation2_emptystate.png)
 
@@ -148,10 +154,10 @@ kubectl patch service ingress-nginx-controller -n ingress-nginx --patch '{ "spec
     name: homestation-secrets
     namespace: homestation
   data:
-    #Data Source=homestationDb,1433;Database=homestation;User Id=sa;Password=<AwesomePassword>;Encrypt=False;TrustServerCertificate=True
+    #Data Source=homestationDb,1433;Database=homestation;User Id=sa;Password=<StrongPass>;Encrypt=False;TrustServerCertificate=True
     ConnectionString: RGF0YSBTb3VyY2U9aG9tZXN0YXRpb25EYiwxNDMzO0RhdGFiYXNlPWhvbWVzdGF0aW9uO1VzZXIgSWQ9c2E7UGFzc3dvcmQ9PEF3ZXNvbWVQYXNzd29yZD47RW5jcnlwdD1GYWxzZTtUcnVzdFNlcnZlckNlcnRpZmljYXRlPVRydWU= 
-    #AwesomePassword
-    DbPassword: QXdlc29tZVBhc3N3b3Jk
+    #StrongPass
+    DbPassword: U3Ryb25nUGFzcw==
   ```
 - Edit database [deployment file](./Miscellaneous/homestationdb-prepare.yaml)
   ```yaml
@@ -216,7 +222,9 @@ kubectl patch service ingress-nginx-controller -n ingress-nginx --patch '{ "spec
             env:
               - name: ACCEPT_EULA
                 value: "Y"
-              - name: SA_PASSWORD
+              - name: MSSQL_DATA_DIR
+                value: /var/opt/mssql/data
+              - name: MSSQL_SA_PASSWORD #SA_PASSWORD is deprecated - https://learn.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-ver16&tabs=cli&pivots=cs1-bash#run-the-container-2
                 valueFrom:
                   secretKeyRef:
                     key: DbPassword
@@ -274,66 +282,72 @@ kubectl patch service ingress-nginx-controller -n ingress-nginx --patch '{ "spec
                   secretKeyRef:
                     key: DbPassword
                     name: homestation-secrets #Specify secret name or replace with `value: "<your password>"`, after removing valueFrom:
-            args: [ "-S", "homestationDb", "-U", "sa", "-P", "$(DbPassword)", "-C", "-I", "-Q", "IF NOT EXIST (SELECT * FROM sys.databases WHERE name = 'homestation') BEGIN CREATE DATABASE homestation; END;" ]
+            args: [ "-S", "homestationDb", "-U", "sa", "-P", "$(DbPassword)", "-C", "-I", "-Q", "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'homestation') BEGIN CREATE DATABASE homestation; END;" ]
         restartPolicy: Never
     backoffLimit: 4
   ```
 - Edit compose.yaml file
-```yaml
-volumes:
-  sqlserver_data:
-networks:
-  homestation:
-    driver: bridge
-
-services:
-  homestation_db:
-    container_name: homestationDb
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    environment:
-      - SA_PASSWORD=<AwesomePassword>
-      - ACCEPT_EULA=Y
-    ports:
-      - "1433:1433"
-    networks:
-      - homestation
-    volumes:
-      - sqlserver_data:/var/opt/mssql
-    restart: always
-
-  homestation_api:
-    container_name: homestationApi
-    environment:
-      - ASPNETCORE_HTTP_PORTS=80
-      - Database__ConnectionString=Data Source=localhost,1433;Database=homestation;User Id=sa;Password=<AwesomePassword>;Encrypt=False;TrustServerCertificate=True
-    build:
-      context: ./Web
-      dockerfile: Dockerfile
-    ports:
-      - "1883:1883"
-      - "8180:80"
-    networks:
-      - homestation
-    depends_on:
+  ```yaml
+  volumes:
+      sqlserver_data:
+  networks:
+      homestation:
+          driver: bridge
+  
+  services:
       homestation_db:
-        condition: service_started
-    restart: always
-
-  homestation_web:
-    container_name: homestationWeb
-    build:
-      context: ./Web/web.client
-      args:
-        - HREF=/homestation/ #If you want to use /homestation/ suffix to address otherwise replace with /
-    ports:
-      - "8080:80"
-      - "8443:443"
-    depends_on:
-      - homestation_api
-    networks:
-      - homestation
-    restart: always
-```
+          container_name: homestationDb
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          environment:
+              MSSQL_SA_PASSWORD: "<StrongPass>" #SA_PASSWORD is deprecated - https://learn.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-ver16&tabs=cli&pivots=cs1-bash#run-the-container-2
+              ACCEPT_EULA: "Y"
+          ports:
+              - "1433:1433"
+          networks:
+              - homestation
+          volumes:
+              - sqlserver_data:/var/opt/mssql
+          restart: always
+          healthcheck:
+              test: /opt/mssql-tools18/bin/sqlcmd -S localhost -C -I -U sa -P $$MSSQL_SA_PASSWORD -Q "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'homestation') BEGIN CREATE DATABASE homestation; END; SELECT 1;" -b -o /dev/null
+              interval: 5s
+              timeout: 30s
+              retries: 30
+              start_period: 5s
+      
+      homestation_api:
+          container_name: homestationApi
+          environment:
+              ASPNETCORE_HTTP_PORTS: "80"
+              Database__ConnectionString: "Data Source=homestationDb,1433;Database=homestation;User Id=sa;Password=<StrongPass>;Encrypt=False;TrustServerCertificate=True" //Define password, or move to secrets
+          build:
+              context: ./Web
+              dockerfile: Dockerfile
+          ports:
+              - "1883:1883"
+              - "8180:80"
+          networks:
+              - homestation
+          depends_on:
+              homestation_db:
+                  condition: service_started
+          restart: always
+      
+      homestation_web:
+          container_name: homestationWeb
+          build:
+              context: ./Web/web.client
+              args:
+                  - HREF=/homestation/ #If you want to use /homestation/ suffix to address otherwise replace with /
+          ports:
+              - "8080:80"
+              - "8443:443"
+          depends_on:
+              - homestation_api
+          networks:
+              - homestation
+          restart: always
+  ```
 - Build images - `docker-compose -f compose.yaml build`
 - Tag two images (homestation2-homestation_api, homestation2-homestation_web) with prefix to your registry
 - Push images to registry e.g `docker push <address:port>/homestation2-homestation_api:<your tag>`, `docker push <address:port>/homestation2-homestation_web:<your tag>`
@@ -370,7 +384,7 @@ services:
                   secretKeyRef:
                     key: ConnectionString
                     name: homestation-secrets #Specify other secret if needed, or remove everything under valueFrom: and replace with `value: "<your connection string>"`
-            image: <registry ip:registry port>/homestation2-homestation_api:<registry tag> #specify image registry
+            image: <registry ip:registry port>/homestation2-homestation_api:<your image tag> #specify image registry
             name: homestationapi
             ports:
               - containerPort: 1883 #Customize MQTT port
@@ -393,7 +407,7 @@ services:
         protocol: TCP
         targetPort: 1883 #Container port should be the same as target port
       - name: "80" #Customize HTTP port, rules same as above
-        port: 9180
+        port: 8180
         protocol: TCP
         targetPort: 80
     selector:
@@ -416,9 +430,9 @@ services:
                 service:
                   name: homestationapi
                   port:
-                    number: 9180 #HTTP port
+                    number: 8180 #HTTP port
               pathType: ImplementationSpecific
-    ingressClassName: nginx 
+    ingressClassName: nginx
   ```
 - Apply deployment file `kubectl apply -f Miscellaneous/homestationapi-deployment.yaml`
 - Prepare [web deployment file](./Miscellaneous/homestationweb-deployment.yaml)
@@ -487,12 +501,12 @@ services:
     namespace: homestation
     annotations:
       nginx.ingress.kubernetes.io/use-regex: "true"
-      nginx.ingress.kubernetes.io/rewrite-target: /homestation/ #Same as in compose.yaml
+      nginx.ingress.kubernetes.io/rewrite-target: /homestation/
   spec:
     rules:
       - http:
           paths:
-            - path: /homestation/ #Same as in compose.yaml, replace with / if you don't want to use suffix
+            - path: /homestation/
               backend:
                 service:
                   name: homestationweb

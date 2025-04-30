@@ -52,7 +52,7 @@ spec:
       protocol: TCP
       targetPort: 1883 #Container port should be the same as target port
     - name: "80" #Customize HTTP port, rules same as above
-      port: 9180
+      port: 8180
       protocol: TCP
       targetPort: 80
   selector:
@@ -75,6 +75,6 @@ spec:
               service:
                 name: homestationapi
                 port:
-                  number: 9180 #HTTP port
+                  number: 8180 #HTTP port
             pathType: ImplementationSpecific
   ingressClassName: nginx

@@ -51,7 +51,7 @@ spec:
     - name: "https" #customize HTTPS port
       port: 8443 #Service port to communication, should be the same in a ingress
       protocol: TCP
-      targetPort: 443 
+      targetPort: 443
   selector:
     app.kubernetes.io/name: homestationweb
 ---

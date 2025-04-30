@@ -54,25 +54,25 @@ export class CurrentComponent implements OnInit {
       this.device = storedDevice;
     }
   }
-  
+
   getReading(device: Device | undefined){
     if(!device){
       return;
     }
     this.getData(device.id);
-    
+
     this.device = device;
-    
+
     if(this.device){
       this.storage.setLastSelectedDevice(this.device!.name);
     }
-    
+
     if(!this.interval){
       this.interval = setInterval(() => {
         this.getReading(device);
       }, 20000);
     }
-    
+
   }
 
   private getData(deviceId: number){
